@@ -1,0 +1,16 @@
+# docker-compose 
+
+services:
+  extractor_sql:
+    image: extractor_sql_dag_img
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: extractor_sql_dag
+    env_file:  
+      - ./app/.env
+    volumes:
+      - ./app:/home/app         
+    working_dir: /home/app
+    # command: python extractor_03.py
+    command: tail -f /dev/null

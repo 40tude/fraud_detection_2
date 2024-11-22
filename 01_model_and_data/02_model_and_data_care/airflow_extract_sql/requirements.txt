@@ -1,0 +1,6 @@
+# requirements.txt
+
+ccxt
+apache-airflow-providers-docker
+docker
+python-dotenv

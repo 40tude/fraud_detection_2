@@ -1,0 +1,59 @@
+import os
+import uvicorn
+import pandas as pd
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.requests import Request
+
+from models_loader import get_models
+from schemas import InputData
+from utils import make_prediction
+from dotenv import load_dotenv
+
+# ----------------------------------------------------------------------------- #
+load_dotenv()
+latest_mod, previous_mod = get_models()
+current_mod = latest_mod
+app = FastAPI()
+
+# Configure the template folder
+templates = Jinja2Templates(directory="templates")
+
+
+# ----------------------------------------------------------------------------- #
+@app.get("/get_model_ver")
+async def get_model_ver():
+    return {"version": f"{current_mod.version}"}
+
+
+@app.get("/switch_model_ver")
+async def switch_model_ver():
+    global current_mod
+    current_mod = previous_mod if current_mod == latest_mod else latest_mod
+    return {"version": f"{current_mod.version}"}
+
+
+@app.post("/predict")
+async def predict(data: InputData):
+    try:
+        df = pd.DataFrame(data=data.data, columns=data.columns, index=data.index)
+        prediction = make_prediction(current_mod.loaded_model, df)
+        return {"prediction": f"{prediction}"}
+    except Exception as e:
+        print(str(e))
+        raise HTTPException(
+            status_code=500,
+            detail="Check that the number of parameters and their spelling are correct.",
+        )
+
+
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    return templates.TemplateResponse("home.html", {"request": request})
+
+
+# ----------------------------------------------------------------------------- #
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)

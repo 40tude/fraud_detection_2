@@ -1,0 +1,15 @@
+services:
+  modelizer:
+    image: modelizer_img
+    build: /docker
+    container_name: modelizer
+    environment:
+      - AWS_REGION=${AWS_REGION}  
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}  
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    volumes:
+      - ./app:/home/app              
+    working_dir: /home/app
+    command: python modelizer03.py
+    ports:
+      - "8000:8000"  # host:container

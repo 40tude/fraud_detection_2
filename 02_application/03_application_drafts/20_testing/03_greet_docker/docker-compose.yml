@@ -1,0 +1,13 @@
+services:
+  greet:
+    image: greet_img
+    container_name: greet
+    environment:
+      - PASSWORD=${PASSWORD}
+    volumes:
+      - ./app:/home/app
+      - ./img:/home/img
+    working_dir: /home/app
+    command: python main.py
+
+

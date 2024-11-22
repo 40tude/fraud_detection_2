@@ -1,0 +1,13 @@
+services:
+  extractor_sql:
+    image: extractor_sql_img
+    # build: /docker
+    container_name: extractor_sql
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - LOGGER_SQL_URI=${LOGGER_SQL_URI}
+    volumes:
+      - ./app:/home/app              
+    working_dir: /home/app
+    command: python extractor_03.py

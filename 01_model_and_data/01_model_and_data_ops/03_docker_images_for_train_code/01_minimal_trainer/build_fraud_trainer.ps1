@@ -1,0 +1,1 @@
+docker build -t template_fraud_trainer .

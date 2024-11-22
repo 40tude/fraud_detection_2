@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-predict
+spec:
+  replicas: 2  # Nombre initial de pods
+  selector:
+    matchLabels:
+      app: client-predict
+  template:
+    metadata:
+      labels:
+        app: client-predict
+    spec:
+      containers:
+      - name: client-predict-container
+        image: client-predict                # l'image de l'application
+        # ports:
+        # - containerPort: 80  # Port exposé par le conteneur
+        envFrom:
+            - secretRef:
+                name: client-predict-variables    # see secrets.yaml

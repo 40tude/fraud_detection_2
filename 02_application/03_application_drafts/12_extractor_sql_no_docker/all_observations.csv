@@ -1,0 +1,2 @@
+,trans_date_trans_time,cc_num,merchant,category,amt,first,last,gender,street,city,state,zip,lat,long,city_pop,job,dob,trans_num,unix_time,merch_lat,merch_long,is_fraud
+1,2024-10-31 15:51:19,30199621383748,fraud_Reilly LLC,home,31.78,Theresa,Powell,F,117 Natasha Vista Suite 936,Leonard,TX,75452,33.4044,-96.2238,4090,Sub,1977-03-23,a153aab0d79aa43d46d19c3f5ed18da8,1730389879525,34.043309,-96.397567,1

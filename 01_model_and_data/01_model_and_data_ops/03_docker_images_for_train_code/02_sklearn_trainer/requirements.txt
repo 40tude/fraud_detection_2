@@ -1,0 +1,26 @@
+# -----------------------------------------------------------------------------
+# The 3 libs below are MANDATORY
+boto3               # for AWS
+mlflow==2.17.1      # same version as the mlflow tracking server
+psycopg2-binary     # connection to PostgreSQL
+
+
+# -----------------------------------------------------------------------------
+# Add according your needs
+# fsspec              # to read s3://fraud-bucket-202406/data/validated.csv
+# s3fs                # to read s3://fraud-bucket-202406/data/validated.csv
+seaborn             
+imbalanced-learn      # for the sklearn train.py template
+
+
+
+# -----------------------------------------------------------------------------
+# Other lib 
+# tensorflow
+# scikit-learn==1.4.2 
+# gunicorn 
+# streamlit 
+# matplotlib 
+# plotly
+# pandas
+#pillow              # only for the testing train.py (help to save png artifact)

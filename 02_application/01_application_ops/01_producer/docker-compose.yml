@@ -1,0 +1,12 @@
+services:
+  producer:
+    image: producer_img
+    build: /docker
+    container_name: producer
+    environment:
+      - SASL_USERNAME=${SASL_USERNAME}
+      - SASL_PASSWORD=${SASL_PASSWORD}
+    volumes:
+      - ./app:/home/app              
+    working_dir: /home/app
+    command: python producer03.py

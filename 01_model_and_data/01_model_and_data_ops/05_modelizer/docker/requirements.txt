@@ -1,0 +1,11 @@
+uvicorn
+pydantic
+fastapi
+
+# required to execute the model
+mlflow
+boto3 
+imbalanced-learn
+python-dotenv
+jinja2
+
