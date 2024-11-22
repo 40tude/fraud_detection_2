@@ -1,0 +1,36 @@
+# docker-compose.yml
+
+services:
+  logger_sql:
+    image: logger_sql_img
+    build:
+      # determine the working directory on the host
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: logger_sql
+    environment:
+      SASL_USERNAME: ${SASL_USERNAME}
+      SASL_PASSWORD: ${SASL_PASSWORD}
+      LOGGER_SQL_URI: ${LOGGER_SQL_URI}
+    volumes:
+      - ./app:/home/app
+    # specifies the default working directory in the container at the time of service execution
+    # ie independently of the WORKDIR directive defined in the Dockerfile
+    working_dir: /home/app
+    command: python logger_04.py
+
+  logger_sql_test:
+    image: logger_sql_img_test
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        REQUIREMENTS_4TESTS: requirements_4tests.txt
+    container_name: logger_sql_test
+    environment:
+      PYTHONPATH: /home/app  
+    volumes:
+      - ./app:/home/app
+      - ./test_reports:/home/test_reports
+    working_dir: /home
+    command: pytest --junitxml=/home/test_reports/pytest_report.xml --html=/home/test_reports/pytest_report.html

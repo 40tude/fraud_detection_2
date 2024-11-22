@@ -1,0 +1,17 @@
+# docker-compose.yml
+services:
+
+  modelizer:
+    image: modelizer_img
+    build: 
+      context: .
+      dockerfile: /docker/Dockerfile
+    container_name: modelizer
+    env_file:  
+      - ./app/.env
+    volumes:
+      - ./app:/home/app              
+    working_dir: /home/app
+    command: python modelizer04.py
+    ports:
+      - "8005:8005"  # host:container Make sure the port number matches the port of uvicorn in modelizerXY.py

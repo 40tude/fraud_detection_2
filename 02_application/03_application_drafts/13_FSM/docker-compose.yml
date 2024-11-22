@@ -1,0 +1,12 @@
+services:
+  fsm:
+    image: fsm_img
+    build: /docker
+    container_name: fsm
+    volumes:
+      - ./app:/home/app              
+    working_dir: /home/app
+    command: python finite_state_machine.py
+    ports:
+      - "5000:5000"  # host:container
+

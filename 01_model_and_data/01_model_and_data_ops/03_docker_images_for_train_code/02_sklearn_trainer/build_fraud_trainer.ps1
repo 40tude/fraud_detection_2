@@ -1,0 +1,1 @@
+docker build -t sklearn_fraud_trainer .

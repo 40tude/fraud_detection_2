@@ -1,0 +1,21 @@
+# docker-compose 
+
+# docker-compose 
+
+services:
+  extractor_sql:
+    image: extractor_sql_dag_img
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: extractor_sql_dag
+    env_file:
+      - ./app/.env
+    volumes:
+      - extractor_sql_dag_shared_app:/home/app      # What is mounted : local directory
+    working_dir: /home/app
+    command: python extractor_03.py                   
+
+volumes:
+  extractor_sql_dag_shared_app:                     # will become 08_airflow_extractor_sql_dag_shared_app
+                                                    # airflow_dir_name_ + volume_name

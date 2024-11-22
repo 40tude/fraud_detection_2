@@ -1,0 +1,55 @@
+# files to ignore
+secrets.ps1
+.env
+Jenkinsfile
+
+# directories to ignore
+.git/
+.vscode/
+.mypy_cache/
+__pycache__/
+
+# Large files Size > 100MB (warning at 50MB)
+# No way to specify the size in .gitignore
+# Get-ChildItem ./ -recurse | where-object {$_.length -gt 100000000} | Sort-Object length | ft fullname, length -auto
+
+# Add below the large files listed with the previous command
+# Initially, fraud_test.csv is available here: https://app.jedha.co/course/final-projects-l/automatic-fraud-detection-l
+# No need to list it since we already exclude ./data directory
+# fraud_test.csv
+
+###############################################################################
+# This may help
+
+# Display all files secret*.*
+# Get-ChildItem -Path . -Recurse -Force -Filter "secret*.*" | ForEach-Object { $_.FullName } 
+
+# Find the project directory size - GitHub 5GB max
+# (Get-ChildItem . -Recurse | Measure-Object -Property Length -sum).sum/1GB
+
+# Search for files containing the pattern "AWS_SECRET_ACCESS_KEY" and display the file paths where this pattern is found
+# Get-ChildItem -Recurse -File | Select-String -Pattern "AWS_SECRET_ACCESS_KEY" | Select-Object -ExpandProperty Path
+
+# List the 20 largest files in a directory and its subdirectories
+# Get-ChildItem -Path . -Recurse | Sort-Object Length -Descending | Select-Object FullName, Length -First 20
+
+# Search for directories named .aws in the current directory and its subdirectories
+# Get-ChildItem -Path . -Directory -Recurse -Force | Where-Object { $_.Name -eq ".aws" }
+
+# List all PNG files in a directory and its subdirectories, then display their full paths
+# Get-ChildItem -Path . -Filter *.png -Recurse | Select-Object -ExpandProperty FullName
+
+# No longer needed as they no longer exist
+# secrets.sh
+# secrets.yaml
+# python.config
+
+# .aws/
+# *.aws
+# files like my-keypair.pem (AWS key)
+# *.pem
+
+# Docker Compose environment variables
+# See https://app.jedha.co/course/docker-reminders-l/docker-compose-l
+# *.env 
+# *.pyc

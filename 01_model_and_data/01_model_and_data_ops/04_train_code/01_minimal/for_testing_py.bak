@@ -1,0 +1,77 @@
+# might be useful one day if I want to test train.py
+# need to create a ./tests call pytest etc
+# need to create empty __init__.py
+# see 99_tooling\20_testing then 99_tooling\24_Jenkins_Testing
+
+import pytest
+import mlflow
+from unittest.mock import patch, MagicMock
+from pathlib import Path
+from PIL import Image
+import os
+import datetime
+
+from train.py import ModelTrainer  
+
+
+# -----------------------------------------------------------------------------
+@pytest.fixture
+def mock_mlflow():
+    with patch("mlflow.log_param") as mock_log_param, patch("mlflow.set_tag") as mock_set_tag, patch("mlflow.log_artifact") as mock_log_artifact:
+        yield mock_log_param, mock_set_tag, mock_log_artifact
+
+
+# -----------------------------------------------------------------------------
+@pytest.fixture
+def clear_img_dir():
+    img_path = Path("./img")
+    img_path.mkdir(parents=True, exist_ok=True)
+    yield
+    for file in img_path.glob("*.png"):
+        file.unlink()
+
+
+# -----------------------------------------------------------------------------
+def test_model_trainer_image_creation(mock_mlflow, clear_img_dir):
+    _, _, mock_log_artifact = mock_mlflow
+
+    trainer = ModelTrainer()
+
+    # Check if a png file has been createdin ./img
+    img_files = list(Path("./img").glob("*.png"))
+    assert len(img_files) == 1, "L'image n'a pas été correctement créée dans le dossier img"
+    
+    # check if the file is logged as artifact
+    mock_log_artifact.assert_called_once_with(str(img_files[0]))
+
+
+
+# -----------------------------------------------------------------------------
+def test_model_trainer_logging(mock_mlflow, clear_img_dir):
+    mock_log_param, mock_set_tag, _ = mock_mlflow
+
+    trainer = ModelTrainer()
+
+    # Check that parameters and tags are logged
+    mock_log_param.assert_called_once_with("Dummy_Param", 42)
+    mock_set_tag.assert_called_once_with("Author", "Philippe")
+
+
+# -----------------------------------------------------------------------------
+def test_model_trainer_image_color(clear_img_dir):
+    trainer = ModelTrainer()
+    img_files = list(Path("./img").glob("*.png"))
+    assert len(img_files) == 1
+
+    # Check color image
+    image = Image.open(img_files[0])
+    color = image.getpixel((0, 0))
+    assert color in [(0, 0, 255), (255, 0, 0), (255, 165, 0), (0, 128, 0)], "La couleur de l'image n'est pas correcte"
+
+# -----------------------------------------------------------------------------
+@pytest.mark.parametrize("dummy_param,author", [(42, "Philippe")])
+def test_model_trainer_params_and_tags(dummy_param, author, mock_mlflow):
+    mock_log_param, mock_set_tag, _ = mock_mlflow
+    trainer = ModelTrainer()
+    mock_log_param.assert_called_with("Dummy_Param", dummy_param)
+    mock_set_tag.assert_called_with("Author", author)

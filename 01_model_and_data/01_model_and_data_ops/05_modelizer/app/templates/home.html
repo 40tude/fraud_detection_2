@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelizer</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/static/favicon02.png">
+</head>
+
+<body class="bg-light">
+    <div class="container mt-5">
+        <h1 class="text-center text-primary">Welcome to Fraud Detection 2 Modelizer</h1>
+        <p class="text-center">Use this application to get inferences from our <code>fraud_detection_2 model</code>.</p>
+        <div class="text-center mt-4">
+            <a href="/docs" class="btn btn-primary">Go to API Documentation</a>
+        </div>
+        <div class="mt-5">
+            <h3>Quick Start:</h3>
+            <ul>
+                <li>Use the endpoint <code>/predict</code> to make predictions.</li>
+                <li>Visit <code>/docs</code> for detailed API testing.</li>
+            </ul>
+        </div>
+
+        <div class="mt-5">
+            <h4>Example 1: Not a Fraudulent Transaction</h4>
+            <p>
+                Once the <code>/predict</code> panel is open, click the <strong>"Try it out"</strong> button.<br />
+                For a first test, copy and paste the JSON below (from "{" to "}", both included).<br />
+                This is not a fraudulent transaction, the prediction will be <strong>0</strong>.<br />
+                Feel free to send erroneous data. You will get de 500 error and a message.
+            </p>
+            <div class="card p-3 bg-light border">
+                <pre>
+{
+    "columns": ["trans_date_trans_time", "cc_num", "merchant", "category", "amt", "first", "last", "gender", "street", "city", "state", "zip", "lat", "long", "city_pop", "job", "dob", "trans_num", "unix_time", "merch_lat", "merch_long", "is_fraud"],
+    "index": [164481],
+    "data": [["2024-10-31 15:58:29", 38530489946071, "fraud_Cole, Hills and Jewess", "home", 22.9, "Laura", "Johns", "F", "95835 Garcia Rue", "Arcadia", "SC", 29320, 34.9572, -81.9916, 530, "Animal technologist", "1989-05-14", "fd6f5d5606f49ffbc33c2a28dfe006f1", 1730390309560, 34.831131, -82.885952, 0]]
+}
+                </pre>
+            </div>
+        </div>
+
+        <div class="mt-5">
+            <h4>Example 2: Fraudulent Transaction</h4>
+            <p>
+                For a second test, copy and paste the JSON below.<br />
+                This is a fraudulent transaction, the prediction will be <strong>1</strong>.
+            </p>
+            <div class="card p-3 bg-light border">
+                <pre>
+{
+    "columns": ["trans_date_trans_time", "cc_num", "merchant", "category", "amt", "first", "last", "gender", "street", "city", "state", "zip", "lat", "long", "city_pop", "job", "dob", "trans_num", "unix_time", "merch_lat", "merch_long", "is_fraud"],
+    "index": [1781],
+    "data": [["2020-06-21 22:37", 6564459919350820, "fraud_Nienow PLC", "entertainment", 620.33, "Douglas", "Willis", "M", "619 Jeremy Garden Apt. 681", "Benton", "WI", 53803, 42.5545, -90.3508, 1306, "Public relations officer", "1958-09-10", "47a9987ae81d99f7832a54b29a77bf4b", 1371854247, 42.771834, -90.158365, 1]]
+}
+                </pre>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

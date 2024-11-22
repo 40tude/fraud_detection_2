@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: client-predict-service
+spec:
+  selector:
+    app: client_predict
+  ports:
+  - protocol: TCP
+    port: 80          # côté app dans le cluster
+    targetPort: 8000  # localhost:8000
+  type: LoadBalancer  # Utilisez ClusterIP pour un service interne

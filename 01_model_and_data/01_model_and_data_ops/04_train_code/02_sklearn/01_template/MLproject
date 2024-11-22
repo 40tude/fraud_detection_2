@@ -1,0 +1,21 @@
+name: fraud_detection 
+
+docker_env:
+  image: sklearn_fraud_trainer
+  volumes: ["%cd%:/home/app"]
+  environment: [ 
+      "MLFLOW_TRACKING_URI", 
+      "AWS_ACCESS_KEY_ID",
+      "AWS_SECRET_ACCESS_KEY",
+    ]
+    
+entry_points:
+  main:
+    command: "python train.py" 
+    # Shows how to pass default parameters
+    # train.py will need to : import argparse
+    # Uncomment all the lines below
+    # parameters:
+      # n_estimators: {type: int, default: 15} 
+      # min_samples_split: {type: int, default: 3} 
+    # command: "python train.py --n_estimators {n_estimators} --min_samples_split {min_samples_split}" 
