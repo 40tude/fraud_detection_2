@@ -71,6 +71,14 @@ docker run --rm -v C:/Users/phili/OneDrive/Documents/Programmation/fraud_detecti
 docker run --rm -v C:/Users/phili/OneDrive/Documents/Programmation/fraud_detection_2/06_extractor_sql_dag/app:/source -v 08_airflow_shared_app:/mnt busybox sh -c "cp -r /source/. /mnt/"
 
 
+
+TODO : Mettre à jour la partie
+docker run --rm `
+  -v C:\Users\phili\OneDrive\Documents\Programmation\fraud_detection_2\01_model_and_data\01_model_and_data_ops\06_extractor_sql_dag\app:/source `
+  -v 01_dag_extract_sql_extractor_sql_dag_shared_app:/mnt `
+  busybox sh -c "cp -r /source/. /mnt/"
+
+docker exec -it 01_dag_extract_sql-airflow-worker-1 bash
  -->v
 
 

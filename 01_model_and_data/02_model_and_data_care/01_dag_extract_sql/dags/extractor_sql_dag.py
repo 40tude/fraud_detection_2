@@ -35,7 +35,7 @@ with DAG(
         command="python /home/app/extractor_03.py",
         env_file=env_vars_str,
         mounts=[
-            Mount(source="08_airflow_extractor_sql_dag_shared_app", target="/home/app", type="volume"),
+            Mount(source="01_dag_extract_sql_extractor_sql_dag_shared_app", target="/home/app", type="volume"),
         ],
         network_mode="bridge",
         auto_remove=True,
