@@ -71,11 +71,13 @@ docker run --rm -v C:/Users/phili/OneDrive/Documents/Programmation/fraud_detecti
 docker run --rm -v C:/Users/phili/OneDrive/Documents/Programmation/fraud_detection_2/06_extractor_sql_dag/app:/source -v 08_airflow_shared_app:/mnt busybox sh -c "cp -r /source/. /mnt/"
 
 
- -->
+ -->v
 
 
 
-
+# Objective
+* Orchestrate with DAG in Airflow the ``fraud_detection_2`` modules running in a Docker container.
+* Here we use `extractor_sql` as an example.
 
 # Installation
 <!-- * Current version of Airflow = 2.10.3 -->
