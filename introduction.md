@@ -20,14 +20,14 @@
 Schema from the initial specifications :
 
 <p align="center">
-<img src="./assets/infra01.png" alt="drawing" width="800"/>
+<img src="./assets/img01.png" alt="drawing" width="800"/>
 <p>
 
 
 See below how it has been translated today :
 
 <p align="center">
-<img src="./assets/infra02.png" alt="drawing" width="800"/>
+<img src="./assets/img03.png" alt="drawing" width="800"/>
 <p>
 
 ## Explanations  

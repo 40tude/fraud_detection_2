@@ -1,2 +1,0 @@
-flask       # for the fsm
-requests    # for the controler

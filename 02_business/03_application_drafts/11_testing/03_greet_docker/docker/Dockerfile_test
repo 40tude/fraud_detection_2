@@ -1,0 +1,16 @@
+# Dockerfile_test
+
+FROM python:3.12-slim
+
+# defines the current working directory for all subsequent instructions in the 
+# Dockerfile, as well as for the execution of commands in the resulting container
+WORKDIR /home
+
+RUN apt-get update
+
+COPY docker/requirements_test.txt .
+RUN pip install --no-cache-dir -r requirements_test.txt    
+
+COPY app/ ./app
+COPY tests/ ./tests
+

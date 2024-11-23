@@ -1,0 +1,25 @@
+# -----------------------------------------------------------------------------
+# The 3 libs below are MANDATORY
+boto3
+mlflow==2.14.1      # same version as the mlflow tracking server
+psycopg2-binary
+
+pandas
+scikit-learn 
+imblearn
+
+# -----------------------------------------------------------------------------
+# Add according your needs
+# pillow              # only for the testing train.py (help to save png artifact)
+# seaborn             # for the sklearn train.py template
+# imbalanced-learn    # for the sklearn train.py template
+
+# -----------------------------------------------------------------------------
+# Other lib 
+
+# tensorflow
+# scikit-learn==1.4.2 
+# gunicorn 
+# streamlit 
+# matplotlib 
+# plotly

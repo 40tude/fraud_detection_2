@@ -1,0 +1,10 @@
+# librdkafka is managed with apt-get
+confluent_kafka 
+avro-python3
+requests
+
+
+# required to store in SQL
+pandas
+psycopg2-binary
+sqlalchemy

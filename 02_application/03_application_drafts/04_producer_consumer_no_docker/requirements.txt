@@ -1,9 +1,0 @@
-requests
-pandas
-# librdkafka-dev est la bibliothèque native C nécessaire, installée via apt-get
-#Voir Dockerfile
-# librdkafka
-confluent_kafka 
-avro-python3
-mlflow
-boto3
