@@ -1,5 +1,0 @@
-requests
-pandas
-# librdkafka est géré par apt-get
-confluent_kafka 
-avro-python3

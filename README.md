@@ -27,7 +27,7 @@ netstat -an | Select-String "LISTENING"
 <!-- ###################################################################### -->
 <!-- ###################################################################### -->
 # Read the .pptx first
-* Iff you read this ``README.md`` after Nov 28, 2024. Otherwise, I'm still working on the project and the slides may not be up to date.
+* If and only if you read this ``README.md`` after Nov 28, 2024. Otherwise, I'm still working on the project and the slides may not be up to date.
 * The content of the slides is mainly a cut-and-paste of what's available in the project notebook(s) and other files
 * The idea is that the slides should help you understand the project and its results, guiding you step by step
 
@@ -40,86 +40,178 @@ netstat -an | Select-String "LISTENING"
     * ``README.md``
 * At the end of each ``README.md`` files there is a **What's next?** section with a link to the next submodule and ``README.md`` file to read.
 * Following the flow of the ``README.md`` you should have a better understanding of how the project was designed, the rationales behind some decisions and how the submodules works etc. 
-* Otherwise, especially when reading for the first time, you may have difficulty understanding what is happening. For example, if you read the documentation of ``01_images_for_model_trainers`` before that of ``00_mlflow_tracking_server`` you risk asking yourself unnecessary questions in relation to the SQL base, the AWS S3... When in fact everything is explained in the previous ``README.md``.
+* Otherwise, especially when reading for the first time, you may have difficulty understanding what is happening. For example, if you read the documentation of ``01_model_and_data\01_model_and_data_ops\03_docker_images_for_train_code`` before that of ``01_model_and_data\01_model_and_data_ops\02_mlflow_tracking_server`` you risk asking yourself unnecessary questions in relation to the SQL base, the AWS S3... When in fact everything is explained in the previous ``README.md``.
 
 <!-- ###################################################################### -->
-## The key README.md you should read
+## Some of the README.md you can read
+
 * [Introduction.md](./introduction.md) : 
-* [00_mlflow_tracking_server\README.md](./00_mlflow_tracking_server/README.md) : 
-* [02_train_code\01_minimal\README.md](./02_train_code/01_minimal/README.md) : 
-* [02_train_code\02_sklearn\01_template\README.md](./02_train_code/02_sklearn/01_template/README.md) :
-* [03_producer\README.md](./03_producer/README.md) :
-* [04_consumer\README.md](./04_consumer/README.md) :
-* 05_logger_sql\README.md : Not yet finished
-* 06_extractor_sql\README.md : Not yet written
-* 07_modelizer\README.md : Not yet written
-* [08_airflow\README.md](./08_airflow/README.md) :
-* [99_tooling\20_testing\README.md](./99_tooling/20_testing/README.md) :
-* [99_tooling\24_Jenkins_Testing\README.md](./99_tooling/24_Jenkins_Testing/README.md) : 
-* [99_tooling\25_DinD\README.md](./99_tooling/25_DinD/README.md) : 
+
+### Model & Data layer
+* [01_model_and_data\01_model_and_data_ops\02_mlflow_tracking_server\README.md](./01_model_and_data/01_model_and_data_ops/02_mlflow_tracking_server/README.md) : 
+* [01_model_and_data\01_model_and_data_ops\04_train_code\01_minimal\README.md](./01_model_and_data/01_model_and_data_ops/04_train_code/01_minimal/README.md) : 
+* [01_model_and_data\01_model_and_data_ops\04_train_code\02_sklearn\01_template\README.md](./01_model_and_data/01_model_and_data_ops/04_train_code/02_sklearn/01_template/README.md) :
+* [01_model_and_data\01_model_and_data_ops\05_modelizer\README.md](./01_model_and_data/01_model_and_data_ops/05_modelizer/README.md) : Not yet written
+* [01_model_and_data\01_model_and_data_ops\06_extractor_sql\README.md](./01_model_and_data/01_model_and_data_ops/06_extractor_sql/README.md) : Not yet written
+* [01_model_and_data\01_model_and_data_ops\06_extractor_sql_dag\README.md](./01_model_and_data/01_model_and_data_ops/06_extractor_sql_dag/README.md) : Not yet written
+
+### Business layer
+* [02_business\01_application_ops\01_producer\README.md](./02_business/01_application_ops/01_producer/README.md) :
+* [02_business\01_application_ops\02_consumer\README.md](./02_business/01_application_ops/02_consumer/README.md) :
+* [02_business\01_application_ops\03_logger_sql\README.md](./02_business/01_application_ops/03_logger_sql/README.md) : Not yest finished
+
+### Test & Monitoring (either Business or Model & Data layer)
+* [02_business\01_application_ops\03_logger_sql_testable\README.md](./02_business/01_application_ops/03_logger_sql_testable/README.md) :
+* [01_model_and_data\02_model_and_data_care\01_dag_extract_sql\README.md](./01_model_and_data/02_model_and_data_care/01_dag_extract_sql/README.md)
+
+
+### Draft (either Business or Model & Data layer)
+* [02_business\03_application_drafts\11_testing\README.md](./02_business/03_application_drafts/11_testing/README.md) : 
+* [02_business\03_application_drafts\14_Jenkins_Testing\README.md](./02_business/03_application_drafts/14_Jenkins_Testing/README.md) : 
 
 
 <!-- ###################################################################### -->
 <!-- ###################################################################### -->
-# Directories organization
-```batch
-./
-├───00_mlflow_tracking_server
-├───01_images_for_model_trainers
-│   └───01_minimal_trainer
-│   └───02_sklearn_trainer
-├───02_train_code
-│   └───01_minimal
-│   └───01_sklearn
-│       ├───01_template
-│       └───99_smote_random_forest
-├───03_producer
-├───04_consumer
-├───05_logger_sql
-├───05_logger_sql_testable
-├───06_extractor_sql
-├───07_modelizer
-├───98_EDA
-├───99_tooling
-├───assets
-└───data 
-```
+# Directories & files organization
 
 ## Content of the directories
-Directories names start with a double digit numbers (e.g. 03_xxx) which helps understand how the different components of the project are serialized : First the MLflow Tracking Server, then build the image where to run the models, then the models... Even if EDA was the very first task it is numbered ``98_EDA`` and is at the bottom of the directory because it is not the main topic of this project.
 
-### The modules are named according the architecture
+### Directories are organized according to the following mental scheme
 
-You will learn more about the architecture in [./introduction.md](./introduction.md) but here is how the architecture of the project looks like :
+Where the global application is divided into 2 complementary layers. 
+
+1. **Model and Data Layer**: This refers to the part of the application responsible for the quality and performance of the models and data. Its focus is on developing, training, and optimizing machine learning models, as well as ensuring the data used is clean, well-prepared, and suitable for the task. This layer is detached from business logic and solely concerned with inference quality and model/data integrity. 
+
+1. **Business Layer** : This is the part that utilizes the models produced by the Model and Data Layer. It is not involved in the development of the models but is responsible for their deployment, usability, integration with business applications, and ensuring the overall quality of the user experience. This layer focuses on aligning the technical outputs with business goals and making them accessible and practical for end users. 
 
 <p align="center">
-<img src="./assets/infra02.png" alt="drawing" width="800"/>
+<img src="./assets/img07.png" alt="drawing" width="800"/>
 <p>
 
 
-### Quick explanation for each sub-directory
 
-* **00_mlflow_tracking_server** : everything needed to build & deploy mlflow tracking server. Runs in a Docker hosted on Heroku 
-* **01_images_for_model_trainers** : everything needed to build docker images where the models to be trained will run. 
-    * **01_minimal_trainer** : create the image for the minimal trainer.   
-    * **02_sklearn_trainer** : create the image for sklearn trainers. 
+
+### The modules are named according the following architecture
+
+You will learn much more about the architecture in [./introduction.md](./introduction.md) but here is how the architecture of the project looks like.  
+All the modules (blocks in orange) run in container. This is also true when they are 
+* tested (read 02_business\03_application_drafts\14_Jenkins_Testing\README.md) 
+* called inside a DAG in airflow (read 01_model_and_data\02_model_and_data_care\01_dag_extract_sql\README.md)
+
+<p align="center">
+<img src="./assets/img03.png" alt="drawing" width="800"/>
+<p>
+
+
+Directories are splitted according the 2 layers mentioned before : 
+1. `model_and_data` 
+1. `business`
+
+Then each of the layers includes only 3 directories : 
+1. ``ops`` : where the different modules are stored 
+1. `care` : were are stored the CI/CD, monitoring tools
+1. `draft` : where are stored the tests, benchmarks and other POC
+
+
+
+Directories names start with a double digit numbers (e.g. 03_xxx) which helps understand how the different components of the project are serialized : First the EDA, the set up an MLflow Tracking Server, then build the Docker images where to run the models, then the models... 
+
+```batch
+fraud_detection_02
+
++---01_model_and_data
+|   +---01_model_and_data_ops
+|   |   +---01_eda
+|   |   +---02_mlflow_tracking_server
+|   |   +---03_docker_images_for_train_code
+|   |   +---04_train_code
+|   |   +---05_modelizer
+|   |   +---06_extractor_sql
+|   |   \---06_extractor_sql_dag
+|   +---02_model_and_data_care
+|   |   +---01_dag_extract_sql
+|   |   \---02_data_drift
+|   +---03_model_and_data_drafts
+|   |   +---01_client_predict
+|   |   +---02_api_test
+|   |   +---03_combine_train_and validated
+|   |   +---04_map_eda
+|   |   +---05_modelizer_no_docker
+|   |   +---06_evidently101
+|   |   +---07_DinD
+|   |   \---08_dag_data_drift
+|   \---04_data
+
++---02_business
+|   +---01_application_ops
+|   |   +---01_producer
+|   |   +---02_consumer
+|   |   +---03_logger_sql
+|   |   \---03_logger_sql_testable
+|   +---02_application_care
+|   |   \---01_jenkins
+|   \---03_application_drafts
+|       +---01_test_kafka_topic1
+|       +---02_client_predict_kub
+|       +---03_test_compose_topic1
+|       +---04_producer_consumer_no_docker
+|       +---05_producer_my_docker_img
+|       +---06_ez_remote_control
+|       +---07_logger_sql
+|       +---08_extractor_sql_no_docker
+|       +---09_FSM
+|       +---10_consumer_modelizer_no_docker
+|       +---11_testing
+|       |   +---01_my_project
+|       |   +---02_my_project
+|       |   +---03_greet_docker
+|       |   +---03_greet_docker_01
+|       |   +---04_greet_docker_smart
+|       |   \---05_greet_docker_smarter
+|       |       +---app
+|       |       +---assets
+|       |       +---docker
+|       |       +---img
+|       |       +---test-reports
+|       |       \---tests
+|       +---12_dynamic_load
+|       |   +---mon_module
+|       +---13_resilient_topic
+|       \---14_Jenkins_Testing
+|           +---app
+|           +---docker
+|           +---img
+|           +---tests
+|           \---test_reports
+```
+
+
+
+### Quick explanation for some of the sub-directories
+
+#### Model-and_data layer
+* **02_mlflow_tracking_server** : everything needed to build & deploy mlflow tracking server. Runs in a Docker hosted on Heroku 
+* **03_docker_images_for_train_code** : everything needed to build docker images where the models to be trained will run. 
+    * **03_docker_images_for_train_code\01_minimal_trainer** : create the image for the minimal trainers  
+    * **03_docker_images_for_train_code\02_sklearn_trainer** : create the image for the sklearn trainers 
 * **02_train_code** : the models 
-    * **01_minimal** : show how, with only 20 lines of code, a trainer can save artifacts, tags, model on MLflow Tracking Server. Runs in a Docker
-    * **01_sklearn**
-        * **01_template** : serve as a starting point for sklearn models. Based on MLproject. Runs in a Docker
-        * **99_smote_random_forest** : the model used in the project. Based on MLproject. Runs in a Docker
-* **03_producer** : read transactions with an API and store them in a Kafka topic (``topic_1``). Runs in a Docker
-* **04_consumer** : read transactions from a topic_1, ask for prediction, store the result in a Kafka topic (``topic_2``). Runs in a Docker
-* **05_logger_sql** : read (transaction + prediction) from topic_2 and store in SQL database hosted on Heroku. Runs in a Docker
-* **05_logger_sql_testable** : Same as above + automatic unit testing with Jenkins. Tests runs in a Docker in a Jenkins Docker container.
+    * **04_train_code\01_minimal** : show how, with only 20 lines of code, a trainer can save artifacts, tags, model on MLflow Tracking Server. Runs in a Docker
+    * **02_sklearn**
+        * **01_template** : serve as a starting point for sklearn models. Based on MLproject. Runs in a Docker container
+        * **99_smote_random_forest** : the model used in the project. Based on MLproject. Runs in a Docker container
+* **05_modelizer** : Exposes with thru an API the model. Called by the ``consumer`` to get the predictions, rollback model... Runs in a Docker
 * **06_extractor_sql** : daily, extracts from the SQL database the confirmed records, fill a ``validated.csv`` on AWS S3. Runs in a Docker
-* **07_modelizer** : Exposes with thru an API the model. Called by the ``consumer`` to get the predictions, rollback model... Runs in a Docker
-* **08_airflow** : Show how to use a module in its container inside a DAG.
-* **09_evidently** : Not yet known at the time of writing this ``README.md``.
-* **98_EDA** : EDA of project. A jupyter notebook
-* **99_tooling** : 20+ differents sub-projects and other tests. Many of them have ``README.md``
-* **assets** : png, pptx with drawings... Most of the subdirectories have an `assets` folder. They all serve the same purpose. Keep logs, png, csv... And keep the directory clean.
-* **data** : a local copy of the dataset 
+* **06_extractor_sql_dag** : same as above but runs in a Docker container in a Airflow DAQ
+* **04_data** : a local copy of the dataset 
+
+#### Business layer
+* **01_producer** : read transactions with an API and store them in a Kafka topic (``topic_1``). Runs in a Docker
+* **02_consumer** : read transactions from a topic_1, ask for prediction, store the result in a Kafka topic (``topic_2``). Runs in a Docker
+* **03_logger_sql** : read (transaction + prediction) from topic_2 and store in SQL database hosted on Heroku. Runs in a Docker
+* **03_logger_sql_testable** : Same as above + automatic unit testing with Jenkins. Tests runs in a Docker in a Jenkins Docker container.
+
+
+* **assets** : Most of the directories have an `assets` folder. They all serve the same purpose. Keep logs, png, csv... And keep the directory clean.
 
 
 

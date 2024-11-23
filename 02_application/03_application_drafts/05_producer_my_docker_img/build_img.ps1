@@ -1,1 +1,0 @@
-docker build -t producer_img -f docker/Dockerfile .

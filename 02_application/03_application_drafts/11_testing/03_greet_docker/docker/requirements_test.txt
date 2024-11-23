@@ -1,4 +1,0 @@
-pytest
-#pillow
-psycopg2-binary
-sqlalchemy

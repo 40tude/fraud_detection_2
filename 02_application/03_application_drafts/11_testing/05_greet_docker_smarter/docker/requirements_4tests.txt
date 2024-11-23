@@ -1,6 +1,0 @@
-# requirements_4tests.txt
-
-pytest
-psycopg2-binary
-sqlalchemy
-pytest-html

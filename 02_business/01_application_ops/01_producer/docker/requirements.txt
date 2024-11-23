@@ -1,0 +1,9 @@
+# for the producer
+requests              # to read data from the transaction simulator (API) 
+pandas
+
+# To write to the topic
+# librdkafka is managed with apt-get
+confluent_kafka 
+avro-python3
+
