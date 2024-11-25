@@ -5,13 +5,12 @@ services:
     image: fd2_drift_generator_img
     build: 
       context: .
-      dockerfile: /docker/Dockerfile
+      dockerfile: ./docker/Dockerfile
     container_name: fd2_drift_generator
     env_file:  
       - ./app/.env
     volumes:
       - ./app:/home/app  
-      - ../../04_Data:/home/app/data            
     working_dir: /home/app
     command: python fd2_drift_report_generator.py
     # ports:

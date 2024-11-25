@@ -628,7 +628,7 @@ docker-compose --env-file ./app/.env up logger_sql -d
 
 ```powershell
 cd C:\Users\phili\OneDrive\Documents\Programmation\Formations_JEDHA\04_Data_Science_Lead2_oct_2024\07_MLOps\02_CICD\sample-jenkins-server
-docker-compose up
+docker-compose up -d
 ```
 
 ## Create credential for the 3 passwords
