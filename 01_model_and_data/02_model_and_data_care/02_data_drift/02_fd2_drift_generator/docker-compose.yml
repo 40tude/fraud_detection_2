@@ -1,6 +1,6 @@
 # docker-compose.yml
-services:
 
+services:
   fd2_drift_generator:
     image: fd2_drift_generator_img
     build: 
@@ -14,5 +14,9 @@ services:
     working_dir: /home/app
     command: python fd2_drift_report_generator.py
     
+
+
+
+
     # ports:
       # - "8005:8005"  # host:container 
