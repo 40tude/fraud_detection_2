@@ -27,7 +27,8 @@ netstat -an | Select-String "LISTENING"
 <!-- ###################################################################### -->
 <!-- ###################################################################### -->
 # Read the .pptx first
-* If and only if you read this ``README.md`` after Nov 28, 2024. Otherwise, I'm still working on the project and the slides may not be up to date.
+* If and only if you read this ``README.md`` after **Nov 28, 2024**. 
+* Otherwise, I'm still working on the project and the slides may not be up to date.
 * The content of the slides is mainly a cut-and-paste of what's available in the project notebook(s) and other files
 * The idea is that the slides should help you understand the project and its results, guiding you step by step
 

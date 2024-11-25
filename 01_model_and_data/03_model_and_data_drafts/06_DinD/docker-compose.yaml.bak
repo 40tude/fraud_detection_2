@@ -1,0 +1,16 @@
+# docker-compose
+
+services:
+  dind_service:
+    image: python-dind:3.12-slim
+    container_name: dind_service
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - extractor_sql_dag_shared_app_2:/home/hosted
+    privileged: true
+    command: /bin/sh
+    stdin_open: true
+    tty: true                           # désactive le mode de détachement 
+
+volumes:
+  extractor_sql_dag_shared_app_2:

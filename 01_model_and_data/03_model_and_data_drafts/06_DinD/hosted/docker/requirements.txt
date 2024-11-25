@@ -1,0 +1,7 @@
+# requirements. txt
+
+psycopg2-binary
+sqlalchemy
+pandas
+fsspec              # for pandas to write/read s3://fraud-detection-2-bucket
+s3fs                # for pandas to write/read s3://fraud-detection-2-bucket
