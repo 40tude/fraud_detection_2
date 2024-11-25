@@ -493,6 +493,8 @@ Dans les logs on voit que le rapport est généré et envoyé au serveur sur Her
 <img src="./assets/img18.png" alt="drawing" width="600"/>
 <p>
 
+
+
 <p align="center">
 <img src="./assets/img19.png" alt="drawing" width="400"/>
 <p>
