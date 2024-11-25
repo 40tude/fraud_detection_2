@@ -400,7 +400,103 @@ Le rapport est généré et envoyé au serveur sur Heroku. Le mail est réçu av
 <p>
 
 
-## 
+# Utiliser Jenkins pour comme un CRON "de luxe"
+
+Dans Jnekins ajouter une tâche `fd2_drift_report_generator`
+Choisir Pipeline
+Afin de lancer la tâche toutes les 4H : H */4 * * *
+Sinon voilà le script groovy utilisé
+* A l'instar de ce que l'on a déjà fait, on reconstuit à la volée le fichier ``.env``
+* J'ai perdu beaucoup de temps 
+
+```
+build: 
+      context: .
+      dockerfile: ./docker/Dockerfile
+```
+Au lieu de 
+
+```
+build: 
+      context: .
+      dockerfile: /docker/Dockerfile
+```
+Que j'utilise quasiment partout...
+La clé a été d'utiliser un step de debug, un truc du style
+
+```groovy
+stage('Verify Docker Context') {
+    steps {
+        dir('01_model_and_data/02_model_and_data_care/02_data_drift/02_fd2_drift_generator') {
+            sh 'docker compose -f docker-compose.yml config'
+        }
+    }
+}
+```
+
+
+```groovy
+pipeline { 
+    agent any
+
+    stages {
+        stage('Generate .env') {
+            steps {
+                
+                dir('01_model_and_data/02_model_and_data_care/02_data_drift/02_fd2_drift_generator/app') {
+                    withCredentials([
+                        string(credentialsId: 'SMTP_USER', variable: 'SMTP_USER'),
+                        string(credentialsId: 'SMTP_PASSWORD', variable: 'SMTP_PASSWORD'),
+                    ]) {
+                        writeFile file: '.env', text: """
+                        SMTP_USER=$SMTP_USER
+                        SMTP_PASSWORD=$SMTP_PASSWORD
+                        SMTP_SERVER=smtp.gmail.com
+                        SMTP_PORT=587
+                        EMAIL_RECIPIENT=philippe.baucour@gmail.com
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/40tude/fraud_detection_2'
+            }
+        }
+
+        stage('Generate Drift Report') {
+            steps {
+                dir('01_model_and_data/02_model_and_data_care/02_data_drift/02_fd2_drift_generator') {
+                    sh 'docker compose up fd2_drift_generator'
+                }
+            }
+        }
+
+    }
+
+    post {
+        always {
+            dir('01_model_and_data/02_model_and_data_care/02_data_drift/02_fd2_drift_generator') {
+                sh 'docker compose -f docker-compose.yml down --remove-orphans'
+            }
+        }
+    }
+}
+```
+
+
+Dans les logs on voit que le rapport est généré et envoyé au serveur sur Heroku. Le mail est réçu avec le lien sur la bonne page
+
+<p align="center">
+<img src="./assets/img18.png" alt="drawing" width="600"/>
+<p>
+
+<p align="center">
+<img src="./assets/img19.png" alt="drawing" width="400"/>
+<p>
+
 
 
 
