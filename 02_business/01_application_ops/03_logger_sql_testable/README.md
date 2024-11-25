@@ -20,6 +20,27 @@ docker-compose up
 -->
 
 
+<!-- 
+Suite réarrangement des répertoires
+Il a fallu refaire le Jenkinsfile 
+Ensuite y avait un conflit avec le container précédent => le supprimer
+
+docker exec -it jenkins-docker sh
+docker ps -a
+
+Retourner dans Jenkins
+Relancer le pipeline
+
+J'édite Jenkinsfile
+Je remplace 
+sh 'docker-compose -f docker-compose.yml --env-file app/.env up logger_sql_test'
+par
+sh 'docker compose -f docker-compose.yml --env-file app/.env up logger_sql_test'
+
+
+-->
+
+
 
 
 <!-- ###################################################################### -->
