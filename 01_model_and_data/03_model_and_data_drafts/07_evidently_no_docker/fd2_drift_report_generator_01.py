@@ -50,11 +50,11 @@ k_Local_Data_Dir = k_Current_dir / "../../04_data"
 
 k_Fraud_Test_csv_Local = "fraud_test.csv"
 k_Fraud_Test_csv_URL = "https://lead-program-assets.s3.eu-west-3.amazonaws.com/M05-Projects/fraudTest.csv"
-# k_Production_csv_URL = "https://lead-program-assets.s3.eu-west-3.amazonaws.com/M05-Projects/fraudTest.csv"
+# k_Production_csv_URL = "https://???????????????/validated.csv"
 
 # Pick one of the two
-k_Drift_Server_URL = "http://127.0.0.1:5000"
-# k_Drift_Server_URL = "https://your-heroku-app.herokuapp.com/upload"
+# k_Drift_Server_URL = "http://127.0.0.1:5000"
+k_Drift_Server_URL = "https://fd2-drift-server-485e8a3514d2.herokuapp.com/"
 
 k_Drift_Server_upload_URL = f"{k_Drift_Server_URL}/upload"
 k_Report_Link = f"{k_Drift_Server_URL}/reports?date="

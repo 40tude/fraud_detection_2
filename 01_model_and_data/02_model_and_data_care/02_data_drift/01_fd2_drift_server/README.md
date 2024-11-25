@@ -120,15 +120,17 @@ Et cette organisation de fichiers côté serveur
 
 * Fermez l'instance de VSCode dans laquelle tournait le serveur
 * Avec File Explorer allez à la racine de `fraude_detection_2` (il va falloir pousser sur GitHub)
-* Ouvrez avec Code
-* Dans la barre de gauche, ouvrez ``01_model_and_data\02_model_and_data_care\02_data_drift\01_fd2_drift_server``
+* Ouvrez le répertoire avec VSCode
+* Avec l'Explorer de VSCode, ouvrez ``01_model_and_data\02_model_and_data_care\02_data_drift\01_fd2_drift_server``
 * Ouvrez un terminal intégré dans ce répertoire
 
 
 ``pip list --format=freeze > requirements.txt``
+
 * At the end of requirements.txt add the line "gunicorn==23.0.0"
     * I have to do that because I run WIN11 and I can't install gunicorn
     * gunicorn is only used in "production" on heroku
+
 
 ```txt
 blinker==1.9.0
@@ -146,6 +148,8 @@ wheel==0.44.0
 zipp==3.21.0
 gunicorn==23.0.0
 ```
+
+
 
 Create file ``Procfile``
 * Pay attention to :  fd2-drift-server:create_app()
@@ -172,191 +176,234 @@ assets/
 ```
 
 
-### ATTENTION
+
+
+Ouvrir un terminal **À LA RACINE** du projet ``fraud_detection_2``
+* ``CTRL + SHIFT + ù``
+* C'est **très important** pour la commande `git subtree` qu'on va utiliser 
+
+## ATTENTION
 * Heroku does not allow "_" in project name
 * Use "-" to name your project instead
+
+
+```powershell
+heroku login
+heroku create fd2-drift-server
+```
+
+Note the 2 links in the terminal
+
+* https://fd2-drift-server-485e8a3514d2.herokuapp.com/ 
+* https://git.heroku.com/fd2-drift-server.git
+
+<p align="center">
+<img src="./assets/img09.png" alt="drawing" width="600"/>
+<p>
+
+
+## ATTENTION
+* Les instructions ci-dessous supposent que c'est le premier sous-projet de fraud_detection_2 que vous poussez de cette façon sur Heroku
+* Si ce n'est pas le cas, ci-dessous, remplacez ``heroku`` par ``heroku2``
+* En cas de doute, avant d'aller plus loin faire `git remote -v`
+
+
+```
+git subtree push --prefix 01_model_and_data/02_model_and_data_care/02_data_drift/01_fd2_drift_server heroku main
+```
+
+Below, blablabla is equal to the value in ``secrets.ps1`` for example.
+```
+heroku config:set FLASK_ENV=production
+heroku config:set DRIFT_SERVER_SECRET_KEY=blablabla
+```
+
+The server should be available
+
+<p align="center">
+<img src="./assets/img10.png" alt="drawing" width="800"/>
+<p>
+
+
+Si on ouvre un terminal sur Heroku on peut voir que seuls les fichiers et réportoires vraiment utiles on été envoyés :
+
+<p align="center">
+<img src="./assets/img11.png" alt="drawing" width="800"/>
+<p>
+
+
+Dans le terminal intégré de VSCode si on tape `heroku logs --tail` et si on fait une recherche (CTRL+F) sur `gunicorn` on retrouve bien notre serveur.
+
+<p align="center">
+<img src="./assets/img12.png" alt="drawing" width="800"/>
+<p>
+
+Dorénavant si on fait des modifications dans le code source de `fd2-drift-server`
+1. Ouvrir un terminal **à la racine** de ``fraud_detection_2``
+1. ``git subtree push --prefix 01_model_and_data/02_model_and_data_care/02_data_drift/01_fd2_drift_server heroku main``
+
+
+
+## Test avec le client local
+
+Le code du client est dans le répertoire `./fraud_detection_2/01_model_and_data/03_model_and_data_drafts/07_evidently_no_docker/`  
+On va le laisser là pour l'instant  
+Par contre il faut le modifier pour qu'il envoie les rapport au serveur sur Heroku (`https://fd2-drift-server-485e8a3514d2.herokuapp.com/`)  
+
+### Modification du code source
+
+Ouvrir `fd2_drift_report_generator.py` et vers les modifications suivantes.
+
+```python
+# Pick one of the two
+#k_Drift_Server_URL = "http://127.0.0.1:5000"
+k_Drift_Server_URL = "https://fd2-drift-server-485e8a3514d2.herokuapp.com/"
+```
+F5 pour relancer  
+Tout doit bien se passer et on voit qu'un rapport a été généré et envoyé à 11H49
+
+<p align="center">
+<img src="./assets/img13.png" alt="drawing" width="800"/>
+<p>
+
+On le retrouve sur le serveur et le mail comprend un lien sur le serveur Heroku
+
+<p align="center">
+<img src="./assets/img14.png" alt="drawing" width="400"/>
+<p>
+
+<p align="center">
+<img src="./assets/img15.png" alt="drawing" width="600"/>
+<p>
+
+
+
+
+
+
+
+
+
+
 
 
 
 # Migration du client dans un conteneur
 
+Pour l'instant le code du client est toujours un "brouillon"  
+Il est dans le répertoire `./fraud_detection_2/01_model_and_data/03_model_and_data_drafts/07_evidently_no_docker/`  
+Dans le répertoire `01_model_and_data\02_model_and_data_care\02_data_drift`
 
 
+Créer un répertoire ``02_fd2_drift_report_generator/app`` et y copier les fichiers 
+* ``fd2_drift_report_generator.py``
+* ``secrets.ps1``
+
+Modifier le code de ``fd2_drift_report_generator.py`` pour tenir compte du fait qu'il faut dorénavant
+1. envoyer les rapports sur le serveur Heroku 
+1. aller chercher le dataset de référence, non plus localement, mais sur un bucker AWS S3 
+    * On pourrait monter un volume et continuer à utiliser les données locales mais ici on essaie de jouer le jeu
 
 
+```python
+# Set k_Fraud_Test_csv equal k_Fraud_Test_csv_Local OR k_Fraud_Test_csv_URL OR ...
+k_Fraud_Test_csv_Local = Path(k_Data_Dir) / "fraud_test.csv"
+k_Fraud_Test_csv_URL = "https://lead-program-assets.s3.eu-west-3.amazonaws.com/M05-Projects/fraudTest.csv"
+k_Fraud_Test_csv = k_Fraud_Test_csv_URL
 
-
-
-
-
-
-# Note
-* I use WIN11 (while Heroku runs Linux) but most of the information are platform independent
-* I use conda
-
-# How to
-You should have all the files already. The lines below explain how the project was initially set up.
-* conda create --name fd2-drift-server python=3.12 -y
-* conda activate fd2-drift-server
-* create directory fd2-drift-server 
-* cd ./fd2-drift-server 
-* code .
-* create file mypy.ini
-* create file fd2-drift-server.py
-* conda install flask mypy markdown pygments -y
-* create a secrets.ps1 similar to
-
-```
-$env:FLASHCARDS_SECRET_KEY = "blablabla"
-```
-* create .gitignore
-    * at least, add a line with : secrets.ps1
-* Open a terminal in VSCode (CTRL + ù)
-    * ./secrets.ps1
-* Strike F5 in VScode
-    * The app should be running locally
-    * CTRL+C
-* conda list -e > ./assets/requirements_conda.txt
-* pip list --format=freeze > requirements.txt
-    * At the end of requirements.txt manually add the line "gunicorn==23.0.0"
-    * I have to do that because I run WIN11 and I can't install gunicorn
-    * gunicorn is only used in "production" on heroku
-    * If you run Linux
-        * conda install gunicorn -y
-        * pip list --format=freeze > requirements.txt
-* create file Procfile
-    * Pay attention to :  fd2-drift-server:create_app()
-    * name of the Python file + ":" + entry_point()
-    * in fd2-drift-server.py take a look at create_app()
-        * Gunicorn uses the create_app() function to obtain the Flask application instance, and starts the WSGI server
-* create file runtime.txt
-* From VSCode commit to github
-* From the VSCode integrated terminal 
-
-
-* Open a terminal
-    * Make sure you are **AT THE ROOT** of the `fraud-detection-2` project directory
-
-    ```
-    heroku login
-    heroku create fraud-detection-2       # '-' NOT '_' since Heroku does not allow '_'
-    ```
-    * Pay attention to the content of the terminal and note that these 2 urls have been created 
-        * https://fraud-detection-2-ab95815c7127.herokuapp.com/ 
-        * https://git.heroku.com/fraud-detection-2.git
-    
-    * Push the changes in the project ``fraud_detection_2`` to GitHub
-    * Now with the 2 lines below we :
-        1. add Heroku as a remote  
-        1. push the sub-directory `./00_mlflow_tracking_server` to Heroku 
-
-    ```
-    git remote add heroku https://git.heroku.com/fraud-detection-2.git
-    git subtree push --prefix 00_mlflow_tracking_server heroku main
-    ```
-
-
-
-
-
-    * heroku login
-    * heroku create fd2-drift-server
-        * https://fd2-drift-server-41b349ab0591.herokuapp.com/ 
-        * https://git.heroku.com/fd2-drift-server.git
-        * are created for example
-    * git remote add heroku https://git.heroku.com/fd2-drift-server.git
-    * git push heroku main
-    * heroku config:set FLASK_ENV=production
-    * heroku config:set FLASHCARDS_SECRET_KEY=blablabla 
-    * heroku open
-    * This should work
-
-# Workflow
-## To run locally
-* Open a terminal in VSCode and run ``./secrets.ps1`` once
-    * You can type ``ls env:FLASH*`` to double check
-* Modify files etc.
-* Optional - Commit on github from VSCode    
-* Strike F5 while ``fd2-drift-server.py`` is open
-    * If the app complains
-        1. Stop the app (CTRL+C)
-        1. The Python Debug Console should be opened
-        1. Run ``./secrets.ps1`` once in the Python Debug Console
-
-## To deploy on Heroku
-* Modify files etc.
-* Commit on github from VSCode    
-* ``git push heroku main``
-* type ``heroku open`` in the terminal (or visit the app web page)
-
-# Q&A
-
----
-* Q : How to check gunicorn is serving the app on Heroku?
-* A : Open a terminal locally
-    * heroku logs --tail
-    * CTRL+C 
-    * CTRL+F gunicorn
-    * You should see a line similar to : `[INFO] Starting gunicorn 23.0.0`
-
----
-* Q : Can I organize the markdown files in directories and sub-directories ?
-* A : Yes as long as they are under the ``./static/md`` directory 
-
----
-* Q : Can I organize the .png cards in directories and sub-directories ?
-* A : Yes as long as they are under the ``./static/png`` directory 
-
----
-* Q : Can I insert a link to a .png file or a link to a web page into the answer ?
-* A : Yes. Answers are plain markdown files so you can insert 
-    * link to images
-    * source code
-    * bold, italic fonts
-    * equations and math symbols (Latex syntax)
-
-
----
-* Q : The answer includes a link to a ``.png`` file. What is the path I should use in the content of the answer ? 
-* A : Let's take an example :
-    1. Your markdown file (which includes one or more set of question/answer) is in ``.\static\md\dummy_test`` directory
-    1. The name of the markdown file is ``dummy.md``
-    1. Underneath ``dummy.md`` there is an ``assets`` where there is `dummy.png`
-    
-To make it clear, so far, the organization of the files looks like :
-
-```
-./md
-│   other_QA_file_01.md
-│   other_QA_file_02.md
-│
-└───dummy_test
-    │   dummy.md
-    │
-    └───assets
-            dummy.png
+# Set k_Drift_Server_URL equal to k_Drift_Server_Local OR k_Drift_Server_Heroku OR ...
+k_Drift_Server_Local = "http://127.0.0.1:5000"
+k_Drift_Server_Heroku = "https://fd2-drift-server-485e8a3514d2.herokuapp.com/"
+k_Drift_Server_URL = k_Drift_Server_Heroku
 ```
 
-Here is how to point the ``./md/dummy_test/assets/dummy.png`` from the file ``./md/dummy_test/dummy.md``.
+
+Créer un répertoire ``02_fd2_drift_report_generator/docker`` et y copier le fichier 
+* ``requirements.txt``
+
+```python
+# requirements.txt
+
+evidently
+pandas
+numpy
+requests
+```
+
+Renommer le fichier ``secrets.ps1`` en ``.env``  et modifier son contenu  
+
+```python
+# .env
+# ! This file must be listed in .gitignore
+
+# Email
+SMTP_USER=...
+SMTP_PASSWORD=...
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
+EMAIL_RECIPIENT=...
 
 ```
-Question : The question I want to ask
 
-Answer  : 
-This is the expected answer with a link to the ``./assets/dummy.png`` 
+Créer un ``docker-compose.yml`` dans ``02_fd2_drift_report_generator``
 
+```yaml
+# docker-compose.yml
+services:
+
+  modelizer:
+    image: fd2_drift_generator_img
+    build: 
+      context: .
+      dockerfile: /docker/Dockerfile
+    container_name: fd2_drift_generator
+    env_file:  
+      - ./app/.env
+    volumes:
+      - ./app:/home/app              
+    working_dir: /home/app
+    command: python fd2_drift_report_generator.py
+```
+
+Créer un fichier ``./02_fd2_drift_generator/docker\Dockerfile``
+
+```dockerfile
+FROM python:3.12-slim
+
+WORKDIR /home/app
+
+RUN apt-get update
+
+COPY docker/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt    
+
+COPY app/ .
+
+```
+
+## Tester l'application dans son conteneur
+
+Ouvrir un terminal dans le répertoire ``./02_fd2_drift_generator/``
+
+```powershel
+docker compose up
+```
+
+Le rapport est généré et envoyé au serveur sur Heroku. Le mail est réçu avec le lien sur la bonne page
 
 <p align="center">
-<img src="../static/md/dummy_test/assets/dummy.png" alt="dummy" width="577"/>
-</p>
+<img src="./assets/img16.png" alt="drawing" width="600"/>
+<p>
 
-```
-* Keep in mind you **MUST** point the ``dummy.png`` as if you were in ``./templates/index.html``
-* Indeed the markdown text of the questions and answers is inserted into the ``index.html``
- 
+<p align="center">
+<img src="./assets/img17.png" alt="drawing" width="600"/>
+<p>
 
 
-# About contributions
-This project was developed for personal and educational purposes. Feel free to explore and use it to enhance your own learning in machine learning.
+## 
 
-Given the nature of the project, external contributions are not actively sought or encouraged. However, constructive feedback aimed at improving the project (in terms of speed, accuracy, comprehensiveness, etc.) is welcome. Please note that this project was created as part of a certification process, and it is unlikely to be maintained after the final presentation.    
+
+
+
+
+
