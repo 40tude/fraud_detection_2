@@ -35,6 +35,15 @@ netstat -an | Select-String "LISTENING"
 
 <!-- ###################################################################### -->
 <!-- ###################################################################### -->
+# Video - FR
+A 18 minutes long video where I explain (in French) the rationales of the architecture, how it works etc. It is mostly based on the slides. I'm working a second video where I'll show running code.
+
+* [YouTube](https://youtu.be/uJKpLAfofVA) 
+
+
+
+<!-- ###################################################################### -->
+<!-- ###################################################################### -->
 # Read the README.md files in order
 * The submodules of the project have their own 
     * directory 

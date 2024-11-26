@@ -27,7 +27,7 @@ netstat -an | Select-String "LISTENING"
         dockerfile: /docker/Dockerfile
 
 * Mettre à jour le run_app.ps1
-docker compose run --rm modelizer
+docker compose up
 
 * Modifier modelizer03.py
 from dotenv import load_dotenv
