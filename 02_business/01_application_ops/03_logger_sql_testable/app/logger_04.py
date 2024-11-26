@@ -18,6 +18,8 @@ k_Topic_2 = "topic_2"
 k_GroupId = "python-group-2"
 k_Client_Prop = "client.properties"
 k_table_name = "fraud_detection_2_table"
+
+# ! trans_num VARCHAR(255) UNIQUE,
 k_SQL_Create_Table = f"""CREATE TABLE IF NOT EXISTS {k_table_name} (
     id SERIAL PRIMARY KEY,
     trans_date_trans_time TIMESTAMP,
@@ -37,7 +39,7 @@ k_SQL_Create_Table = f"""CREATE TABLE IF NOT EXISTS {k_table_name} (
     city_pop INTEGER,
     job VARCHAR(100),
     dob DATE,
-    trans_num VARCHAR(255) UNIQUE,
+    trans_num VARCHAR(255),
     unix_time BIGINT,
     merch_lat FLOAT,
     merch_long FLOAT,

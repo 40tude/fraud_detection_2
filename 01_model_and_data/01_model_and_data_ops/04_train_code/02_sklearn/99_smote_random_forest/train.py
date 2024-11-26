@@ -33,6 +33,12 @@ from sklearn.metrics import (
 k_Author = "Philippe"
 k_XpPhase = "Template Dev"
 k_N_Estimators = 150
+
+# 60 sec for 5_000 vs 1H40 for 500_000
+# Set k_N_Rows to None to read all observations
+# k_N_Rows = None
+k_N_Rows = 5_000
+
 # The URL to use is listed on this page : https://app.jedha.co/course/final-projects-l/automatic-fraud-detection-l
 k_URL_Dataset = "https://lead-program-assets.s3.eu-west-3.amazonaws.com/M05-Projects/fraudTest.csv"
 k_URL_Validated = "s3://fraud-detection-2-bucket/data/validated.csv"
@@ -54,18 +60,15 @@ class ModelTrainer:
     def load_data(self) -> pd.DataFrame:
         start_time = time.time()
         data = pd.read_csv(
-            # 60 sec vs 1H40 when all rows are taken into account
             k_URL_Dataset,
-            nrows=5_000,
+            nrows=k_N_Rows,
         )
-        # print(data.head(5))
-        
-        # for local test only
-        # data = pd.read_csv("../../../data/fraud_test.csv", nrows=5_000)
+
+        # local test or debu : only
+        # data = pd.read_csv("../../../../04_data/fraud_test.csv", nrows=500)
 
         data_validated = pd.read_csv(k_URL_Validated)
-        # print(data_validated.head(5))
-        
+
         data = pd.concat([data, data_validated], ignore_index=True)
         logger.debug(f"Nb lines dataset : {len(data)}")
         # print(data.tail(10))

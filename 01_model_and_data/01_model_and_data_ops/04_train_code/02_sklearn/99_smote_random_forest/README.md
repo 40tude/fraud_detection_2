@@ -16,11 +16,7 @@ code .
 ```
 
 ```powershell
-conda install mlflow -c conda-forge -y
-conda install seaborn -c conda-forge -y
-conda install imbalanced-learn -c conda-forge -y
-conda install fsspec -c conda-forge -y
-conda install s3fs -c conda-forge -y
+conda install mlflow seaborn imbalanced-learn fsspec s3fs -c conda-forge -y
 ```
 * Then
     1. Make sure to add `mlruns/` to ``.gitignore``

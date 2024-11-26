@@ -13,9 +13,9 @@ services:
       - PORT=${PORT}                        # communication consumer <-> modelizer
     volumes:
       # - ./app:/home/app
-      - ../07_modelizer/app:/home/app              
-    working_dir: /home/app
-    command: python modelizer03.py
+      - ../../../01_model_and_data/01_model_and_data_ops/05_modelizer/app:/home/app                 
+    working_dir: /home/app                            
+    command: python modelizer04.py
     ports:
       - "${PORT}:${PORT}"                   # host:container
     networks:

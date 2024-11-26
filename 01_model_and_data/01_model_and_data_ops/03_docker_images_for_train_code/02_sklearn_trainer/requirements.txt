@@ -7,8 +7,17 @@ psycopg2-binary     # connection to PostgreSQL
 
 # -----------------------------------------------------------------------------
 # Add according your needs
-# fsspec              # to read s3://fraud-bucket-202406/data/validated.csv
-# s3fs                # to read s3://fraud-bucket-202406/data/validated.csv
+
+# fsspec (Filesystem Spec) is a library that provides a uniform interface for accessing different local, remote and embedded file systems. 
+# It allows applications to work with various file systems without worrying about the internal specifics of each backend2. 
+# For example, you can use fsspec to read and write files stored locally, in the cloud (such as S3 or Google Cloud Storage), or even in specialized file systems.
+
+# s3fs is an implementation of FUSE (Filesystem in Userspace) that lets you mount an Amazon S3 bucket as a local file system. 
+# This means you can access files stored in S3 as if they were on your local disk3. 
+# This makes accessing files stored in S3 transparent and easy to use with other Python tools and libraries.
+
+fsspec              # to read s3://fraud-detection-2-bucket/data/validated.csv
+s3fs                # to read s3://fraud-detection-2-bucket/data/validated.csv
 seaborn             
 imbalanced-learn      # for the sklearn train.py template
 

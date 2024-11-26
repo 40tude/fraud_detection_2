@@ -73,6 +73,7 @@ docker run --rm -v C:/Users/phili/OneDrive/Documents/Programmation/fraud_detecti
 
 
 TODO : Mettre à jour la partie
+DONE !
 docker run --rm `
   -v C:\Users\phili\OneDrive\Documents\Programmation\fraud_detection_2\01_model_and_data\01_model_and_data_ops\06_extractor_sql_dag\app:/source `
   -v 01_dag_extract_sql_extractor_sql_dag_shared_app:/mnt `
@@ -834,13 +835,15 @@ docker volume ls
 <img src="./assets/img168.png" alt="drawing" width="600"/>
 <p>
 
-I can see the named volume `08_airflow_extractor_sql_dag_shared_app`
+I can see the named volume `01_dag_extract_sql_extractor_sql_dag_shared_app`
+On the other hand the app is in ``C:\Users\phili\OneDrive\Documents\Programmation\fraud_detection_2\01_model_and_data\01_model_and_data_ops\06_extractor_sql_dag\app``                    
 
+So to copy one over the other I must run : 
 
 ```powershell
 docker run --rm `
-  -v C:/Users/phili/OneDrive/Documents/Programmation/fraud_detection_2/06_extractor_sql_dag/app:/source `
-  -v 08_airflow_extractor_sql_dag_shared_app:/mnt `
+  -v C:/Users/phili/OneDrive/Documents/Programmation/fraud_detection_2/01_model_and_data/01_model_and_data_ops/06_extractor_sql_dag/app:/source `
+  -v 01_dag_extract_sql_extractor_sql_dag_shared_app:/mnt `
   busybox sh -c "cp -r /source/. /mnt/"
 ```
 * Pay attention to the backticks at the end of the lines. 
@@ -855,7 +858,7 @@ docker run --rm `
 docker ps -a --format "{{.ID}}:    {{.Names}}"      # of docker ps works as weel
 ```
 
-I can see `08_airflow-airflow-worker-1`
+I can see `01_dag_extract_sql-airflow-worker-1`
 
 <p align="center">
 <img src="./assets/img17.png" alt="drawing" width="600"/>
@@ -863,7 +866,7 @@ I can see `08_airflow-airflow-worker-1`
 
 
 ```powershell
-docker exec -it 08_airflow-airflow-worker-1 bash
+docker exec -it 01_dag_extract_sql-airflow-worker-1 bash
 ls -al /home/app
 ```
 
@@ -886,7 +889,7 @@ I can that see ``.env`` and ``extractor_03.py`` are in the named volume.
 ```powershell
 # requirements.txt
 
-ccxt
+#ccxt
 apache-airflow-providers-docker
 docker
 python-dotenv
