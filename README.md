@@ -31,6 +31,7 @@ netstat -an | Select-String "LISTENING"
 * Otherwise, I'm still working on the project and the slides may not be up to date.
 * The content of the slides is mainly a cut-and-paste of what's available in the project notebook(s) and other files
 * The idea is that the slides should help you understand the project and its results, guiding you step by step
+* [The slides](./assets/01_fraud_detection_2_project.pptx)
 
 
 <!-- ###################################################################### -->
@@ -55,7 +56,7 @@ A 18 minutes long video where I explain (in French) the rationales of the archit
 <!-- ###################################################################### -->
 ## Some of the README.md you can read
 
-* [Introduction.md](./introduction.md) : 
+* [Introduction.md](./assets/02_introduction.md) : 
 
 ### Model & Data layer
 * [01_model_and_data\01_model_and_data_ops\02_mlflow_tracking_server\README.md](./01_model_and_data/01_model_and_data_ops/02_mlflow_tracking_server/README.md) : 

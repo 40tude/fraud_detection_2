@@ -1,13 +1,15 @@
 # Automated Setup
 
-* Open VSCode from ``fraud_detection_2`` directory
+* WIN + SHIFT + E
+* Reach ``fraud_detection_2`` directory
+* Open with VSCode
 * Open a terminal (CTRL + SIFHT + ù)
 
 ```powershell
 ./assets/setup_demo.ps1
 ```
 
-# Manual Setp
+# Manual Setup
 1. Start Docker
 
 1. Launch pgAdmin 4
@@ -79,7 +81,8 @@
 
 
 # Producer
-* Navigate to `cd ./02_business\01_application_ops\01_producer`
+* Navigate to `./02_business\01_application_ops\01_producer`
+    * `cd ./02_business\01_application_ops\01_producer`
 * Run:
     * `./build_img.ps1`
     * `./run_app.ps1`
@@ -91,6 +94,7 @@
 
 # Modelizer
 * Navigate to `01_model_and_data\01_model_and_data_ops\05_modelizer`
+    * `cd ./../../../01_model_and_data\01_model_and_data_ops\05_modelizer`
 * Run: `./run_app.ps1`
 * Open: http://localhost:8005/
 * Copy one of the two suggestions
@@ -107,23 +111,29 @@
 
 # Consumer
 * Navigate to `02_business\01_application_ops\02_consumer`
+    * ``cd ./../../../02_business\01_application_ops\02_consumer`` 
 * Run:
     * `./build_img.ps1`
     * `./run_app.ps1`
         * This will start both Modelizer and Consumer
 * On Confluent Topic 2, messages should appear (4 per minute)
 
+
+
 # Logger SQL + Tests
 * Navigate to `02_business\01_application_ops\03_logger_sql_testable`
+    * `cd ./../../../02_business\01_application_ops\03_logger_sql_testable`
 * In pgAdmin 4:
     * Run: `SELECT count(*) FROM fraud_detection_2_table;`
 * Run: `./run_app.ps1`
 * Demo mode: it will add only 3 records to the database
 
+
 ## Local Tests
 * Delete files in `./test_reports`
 * Run: `./test_app.ps1`
 * Open `test_reports\pytest_report.html` in a web browser
+
 
 ## Tests in Jenkins
 * Go to Jenkins: `localhost:8080`
@@ -136,6 +146,7 @@
 
 # Extract SQL - DAG Airflow
 * Navigate to `01_model_and_data\02_model_and_data_care\01_dag_extract_sql`
+    * `cd ./../../../01_model_and_data\02_model_and_data_care\01_dag_extract_sql`
 * Run: `docker compose up`
 * Access Airflow at `localhost:8081`
 * ``extractor_sql``
@@ -160,12 +171,46 @@
 
 # Create a Model Training Image
 * Navigate to `01_model_and_data\01_model_and_data_ops\03_docker_images_for_train_code\02_sklearn_trainer`
+    * ``cd ./../../../01_model_and_data\01_model_and_data_ops\03_docker_images_for_train_code\02_sklearn_trainer``
 * Run: `./build_fraud_trainer.ps1`
 
 # Start Model Training
 * Navigate to `01_model_and_data\01_model_and_data_ops\04_train_code\02_sklearn\99_smote_random_forest`
+    * cd `cd ./../../../../01_model_and_data\01_model_and_data_ops\04_train_code\02_sklearn\99_smote_random_forest`
 * Run: `./run_training`
 * Access MLFlow Tracking Server:
     * https://fraud-detection-2-ab95815c7127.herokuapp.com/
 * Show the experiment, run, model, and version
 * Display artifacts, tags, etc.
+
+
+
+
+
+
+
+
+
+
+<!-- ###################################################################### -->
+<!-- ###################################################################### -->
+<!-- ###################################################################### -->
+<!-- ###################################################################### -->
+<!-- ###################################################################### -->
+
+
+# Shutdown
+Aller dans fraud_detection_2\01_model_and_data\02_model_and_data_care\01_dag_extract_sql
+docker compose down
+
+Aller dans fraud_detection_2\02_business\01_application_ops\01_producer
+docker compose down
+
+Aller dans fraud_detection_2\02_business\01_application_ops\02_consumer
+docker stop consumer modelizer
+docker compose down (TO DO : marche pas bien…)
+
+
+
+cd `cd ./../../../../../`
+
