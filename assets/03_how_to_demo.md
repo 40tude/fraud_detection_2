@@ -1,3 +1,8 @@
+<!-- 
+Start-Process "chrome.exe" -ArgumentList "https://www.example1.com", "https://www.example2.com", "https://www.example3.com"
+Start-Process "chrome.exe" -ArgumentList "--new-window", "https://www.example.com"
+-->
+
 # Automated Setup
 
 * WIN + SHIFT + E

@@ -1,12 +1,13 @@
 <!-- 
 TODO : La doc pour faire tourner extractor_sql_dag
-TODO : Faire un Evidenlty minimal histoire de voir si ça tourne
-TODO : Gestion exception dans Fast PI si on passe les mauvais paramètres
-TODO : Faire une vidéo
+TODO : DONE Faire un Evidenlty minimal histoire de voir si ça tourne
+TODO : DONE Gestion exception dans Fast PI si on passe les mauvais paramètres
+TODO : DONE Faire une vidéo
 TODO : Faire un meta docker compose à la racine du projet
 TODO : Faire un script de démarrage qui utilise le meta docker compose, lance chrome sur Heroku, pgAdmin, Confluent Topic 1 et 2...
 TODO : Finir les tests (avec les 2 docker compose) qui sont expliqués dans 99_tooling\25_DinD\README.md
-TODO : Dans 08_airflow\README.md, voir si on peut passer une chemin relatif dans 
+TODO : Dans 08_airflow\README.md, voir si on peut passer une chemin relatif dans la partie où parle de :
+
 docker run --rm `
     -v C:/Users/phili/OneDrive/Documents/Programmation/fraud_detection_2/06_extractor_sql_dag/app:/source `
     -v 08_airflow_extractor_sql_dag_shared_app:/mnt `
@@ -19,7 +20,7 @@ netstat -an | Select-String "LISTENING"
 
 <!-- ###################################################################### -->
 <!-- ###################################################################### -->
-# Fraud Detection 2 
+# fraud_detection_2 
 
 ### JEDHA Bootcamp - AI Architect - RNCP 38 777 - 2024
 
@@ -38,7 +39,6 @@ netstat -an | Select-String "LISTENING"
 <!-- ###################################################################### -->
 # Video - FR
 
-
 * [Video 1/2](https://youtu.be/uJKpLAfofVA) - A 18 minutes long video where I explain (in French) the rationales behind the architecture, how it works etc. It is mostly based on slides.
 * [Video 2/2](https://youtu.be/06B4iT7odOM) - A 38 minutes long video with live modules running in their container. Show the server involved and how the modules in their container are used in Jekins et Airflow.
 
@@ -48,8 +48,8 @@ netstat -an | Select-String "LISTENING"
 # Read the README.md files in order
 * The submodules of the project have their own 
     * directory 
-    * ``README.md``
-* At the end of each ``README.md`` files there is a **What's next?** section with a link to the next submodule and ``README.md`` file to read.
+    * ``README.md`` file
+* At the end of each ``README.md`` file there is a **What's next?** section with a link to the next submodule and ``README.md`` file to read.
 * Following the flow of the ``README.md`` you should have a better understanding of how the project was designed, the rationales behind some decisions and how the submodules works etc. 
 * Otherwise, especially when reading for the first time, you may have difficulty understanding what is happening. For example, if you read the documentation of ``01_model_and_data\01_model_and_data_ops\03_docker_images_for_train_code`` before that of ``01_model_and_data\01_model_and_data_ops\02_mlflow_tracking_server`` you risk asking yourself unnecessary questions in relation to the SQL base, the AWS S3... When in fact everything is explained in the previous ``README.md``.
 
@@ -104,7 +104,7 @@ Where the global application is divided into 2 complementary layers.
 
 ### The modules are named according the following architecture
 
-You will learn much more about the architecture in [./introduction.md](./introduction.md) but here is how the architecture of the project looks like.  
+You will learn much more about the architecture in [./introduction.md](./assets/02_introduction.md) but here is how the architecture of the project looks like.  
 All the modules (blocks in orange) run in container. This is also true when they are 
 * tested (read 02_business\03_application_drafts\14_Jenkins_Testing\README.md) 
 * called inside a DAG in airflow (read 01_model_and_data\02_model_and_data_care\01_dag_extract_sql\README.md)
@@ -243,9 +243,9 @@ fraud_detection_02
 <!-- ###################################################################### -->
 <!-- ###################################################################### -->
 # What's next ?
-* Stay in this directory and read the [introduction.md](./introduction.md) file 
+* Stay in this directory and read the [introduction.md](./assets/02_introduction.md) file 
     * The previous link (``introduction.md``) may not work on GitHub but it works like a charm locally in VSCode or in a Web browser
-    * [Try this](https://github.com/40tude/fraud_detection_2/tree/main/introduction.md)
+    * [Try this](https://github.com/40tude/fraud_detection_2/tree/main/assets/02_introduction.md)
 
 
 <!-- ###################################################################### -->
@@ -254,13 +254,3 @@ fraud_detection_02
 This project is developed for personal and educational purposes. Feel free to explore and use it to enhance your own learning in machine learning.
 
 Given the nature of the project, external contributions are not actively sought nor encouraged. However, constructive feedback aimed at improving the project (in terms of speed, accuracy, comprehensiveness, etc.) is welcome. Please note that this project is being created as a hobby and is unlikely to be maintained once my initial goal has been achieved.
-
-
-
-<!-- 
-Start-Process "chrome.exe" -ArgumentList "https://www.example1.com", "https://www.example2.com", "https://www.example3.com"
-Start-Process "chrome.exe" -ArgumentList "--new-window", "https://www.example.com"
-
-
-
--->
