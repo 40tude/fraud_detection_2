@@ -37,7 +37,7 @@ k_N_Estimators = 150
 # 60 sec for 5_000 vs 1H40 for 500_000
 # Set k_N_Rows to None to read all observations
 # k_N_Rows = None
-k_N_Rows = 6_000
+k_N_Rows = 5_000
 
 # The URL to use is listed on this page : https://app.jedha.co/course/final-projects-l/automatic-fraud-detection-l
 k_URL_Dataset = "https://lead-program-assets.s3.eu-west-3.amazonaws.com/M05-Projects/fraudTest.csv"
@@ -64,7 +64,7 @@ class ModelTrainer:
             nrows=k_N_Rows,
         )
 
-        # local test or debu : only
+        # local test or debug
         # data = pd.read_csv("../../../../04_data/fraud_test.csv", nrows=500)
 
         data_validated = pd.read_csv(k_URL_Validated)
