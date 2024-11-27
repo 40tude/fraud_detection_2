@@ -40,7 +40,7 @@ netstat -an | Select-String "LISTENING"
 
 
 * [Video 1/2](https://youtu.be/uJKpLAfofVA) - A 18 minutes long video where I explain (in French) the rationales behind the architecture, how it works etc. It is mostly based on slides.
-* [Video 2/2](https://youtu.be/cQjHq3p1Ncc) - A 26 minutes long video with live modules running in their container. Show the server involved and how the modules in their container are used in Jekins et Airflow.
+* [Video 2/2](https://youtu.be/06B4iT7odOM) - A 38 minutes long video with live modules running in their container. Show the server involved and how the modules in their container are used in Jekins et Airflow.
 
 
 <!-- ###################################################################### -->
