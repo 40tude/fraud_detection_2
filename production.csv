@@ -1,0 +1,3 @@
+trans_date_trans_time,cc_num,merchant,category,amt,first,last,gender,street,city,state,zip,lat,long,city_pop,job,dob,trans_num,unix_time,merch_lat,merch_long,is_fraud
+2024-11-27 18:32:00,30501624614310,fraud_Lynch-Wisozk,home,8.84,Amanda,Smith,F,180 Graves Shore,Scotia,SC,29939,32.6786,-81.2455,302,Magazine features editor,1973-05-04,6e7bae2728b3a8d5daa2d454723a9f5d,1732732320066,32.129964,-82.02854,0
+2024-11-27 18:32:04,581293083266,"fraud_Graham, Hegmann and Hammes",food_dining,50.05,William,Thomas,M,39227 Mcpherson Shoals,Lahoma,OK,73754,36.385,-98.0727,1078,Podiatrist,1989-10-06,aeeaa5bff0b4fdb08f29ea87d4a0a9d1,1732732324591,35.835879,-97.15682,0
