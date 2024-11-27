@@ -104,8 +104,12 @@
 * Show retrieval of the version number
 * Demonstrate engine switching
 * Show version 3
-* Press `CTRL+C` in the terminal to stop the Modelizer  
-* **!!!!!! TO BE REVIEWED BEFORE MOVING TO CONSUMER**
+* …
+* We MUST close the Modelizer before we move to the Consumer demo
+	* Open a new terminal
+	* cd ./01_model_and_data\01_model_and_data_ops\05_modelizer
+	* docker compose down
+	* Close the terminal or go back to the previous one.
 
 
 

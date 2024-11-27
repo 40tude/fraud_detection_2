@@ -1,3 +1,13 @@
+# Outils WIN11
+
+## CTRL + SHIF + R
+* Plein écran
+
+## Montage
+* Clipchamp
+
+
+
 # OBS
 
 
