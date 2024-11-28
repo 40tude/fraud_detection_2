@@ -20,14 +20,14 @@
 Schema from the initial specifications :
 
 <p align="center">
-<img src="./assets/img01.png" alt="drawing" width="800"/>
+<img src="./img01.png" alt="drawing" width="800"/>
 <p>
 
 
 See below how it has been translated today :
 
 <p align="center">
-<img src="./assets/img03.png" alt="drawing" width="800"/>
+<img src="./img03.png" alt="drawing" width="800"/>
 <p>
 
 ## Explanations  
@@ -161,7 +161,7 @@ df.head(3)
 <!-- ###################################################################### -->
 <!-- ###################################################################### -->
 # What's next ?
-* Go to the directory `./98_EDA` and read the [README.md](./98_EDA/README.md) file 
+* Go to the directory `./01_model_and_data/01_model_and_data_ops/01_eda` and read the [README.md](./../01_model_and_data/01_model_and_data_ops/01_eda/README.md) file 
     * The previous link (``README.md``) may not work on GitHub but it works like a charm locally in VSCode or in a Web browser
     * [Try this](https://github.com/40tude/fraud_detection_2/tree/main/98_EDA)
 

@@ -345,5 +345,5 @@ web: nginx -c /app/web_app/nginx.conf && mlflow server --host 127.0.0.1 --port 5
 
 <!-- ###################################################################### -->
 ## What's next ?
-* Go to the directory `\02_train_code\01_minimal` to read the [README.md](../02_train_code/01_minimal/README.md) file.
+* Go to the directory `01_model_and_data\01_model_and_data_ops\04_train_code\01_minimal` to read the [README.md](../../01_model_and_data_ops/04_train_code/01_minimal/README.md) file.
     * The previous link to the next README.md to read may not work on GitHub but it works like a charm locally in VSCode or a Web browser.

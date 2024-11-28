@@ -75,8 +75,8 @@ conda install sqlalchemy -c conda-forge -y
 <!-- ###################################################################### -->
 <!-- ###################################################################### -->
 # What's next ?
-* Go to the directory `./05_logger_sql_testable` and read the [README.md](../05_logger_sql_testable/README.md) file 
+* Go to the directory `./03_logger_sql_testable` and read the [README.md](../03_logger_sql_testable/README.md) file 
     * The previous link (``README.md``) may not work on GitHub but it works like a charm locally in VSCode or in a Web browser
-    * [Try this](https://github.com/40tude/fraud_detection_2/tree/main/05_logger_sql_testable)
+    * [Try this](https://github.com/40tude/fraud_detection_2/tree/main/02_business/01_application_ops/03_logger_sql_testable)
 
 

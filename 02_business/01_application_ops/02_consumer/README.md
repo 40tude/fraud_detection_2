@@ -367,7 +367,7 @@ This is not demonstrated here but with ``consumer03.py`` and above, the script c
     * Like it is done in ``producerXY.py``
 * As I write this ``README.md``, nothing has been decided yet, but I'm wondering if ``producer``, ``consumer`` and others modules shouldn't be Flask applications. The point is that we could call them to pass them parameters, ask them to return a status. Once again, it's just an idea and nothing has been decided yet. 
 * The priority is to run ``logger_sql``, which will read the content of ``topic_2`` and save it in an SQL database.
-* Go to the directory `05_logger_sql` and read the [README.md](../05_logger_sql/README.md) file. 
+* Go to the directory `03_logger_sql` and read the [README.md](../03_logger_sql/README.md) file. 
     * The previous link to the next README.md to read may not work on GitHub but it works like a charm locally in VSCode or a Web browser.
 
 
