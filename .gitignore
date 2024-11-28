@@ -34,6 +34,19 @@ fraud_test.csv
 ###############################################################################
 # This may help
 
+# Project stats : 
+#   Total number of files
+#   Get-ChildItem -Recurse -File | Measure-Object | Select-Object -ExpandProperty Count
+
+#   Count the number of files with the extension
+#   Get-ChildItem -Path "./" -Recurse -Filter "*.py" | Measure-Object | Select-Object -ExpandProperty Count
+
+#   Count the number of lines of python code
+#   Get-ChildItem -Recurse -Filter "*.py" | Get-Content | Measure-Object -Line | Select-Object -ExpandProperty Lines
+
+
+
+
 # Display all files secret*.*
 # Get-ChildItem -Path . -Recurse -Force -Filter "secret*.*" | ForEach-Object { $_.FullName } 
 
