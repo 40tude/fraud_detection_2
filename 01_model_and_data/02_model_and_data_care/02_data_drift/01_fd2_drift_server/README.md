@@ -501,6 +501,15 @@ Dans les logs on voit que le rapport est généré et envoyé au serveur sur Her
 
 
 
+<!-- ###################################################################### -->
+<!-- ###################################################################### -->
+# What's next ?
+<!-- * Go to the directory `01_model_and_data\02_model_and_data_care\02_data_drift\01_fd2_drift_server` and read the [README.md](../../02_model_and_data_care/02_data_drift/01_fd2_drift_server/README.md) file  -->
+<!-- * The previous link (``README.md``) may not work on GitHub but it works like a charm locally in VSCode or in a Web browser -->
+<!-- * [Try this](https://github.com/40tude/fraud_detection_2/tree/main/09_evidently) -->
+
+
+
 
 
 

@@ -1017,6 +1017,6 @@ What has been developed here for the `extractor_sql` module should be easily app
 <!-- ###################################################################### -->
 <!-- ###################################################################### -->
 # What's next ?
-* Go to the directory `./09_evidently` and read the [README.md](../09_evidently/README.md) file 
+* Go to the directory `01_model_and_data\02_model_and_data_care\02_data_drift\01_fd2_drift_server` and read the [README.md](../../02_model_and_data_care/02_data_drift/01_fd2_drift_server/README.md) file 
 * The previous link (``README.md``) may not work on GitHub but it works like a charm locally in VSCode or in a Web browser
-* [Try this](https://github.com/40tude/fraud_detection_2/tree/main/09_evidently)
+<!-- * [Try this](https://github.com/40tude/fraud_detection_2/tree/main/09_evidently) -->

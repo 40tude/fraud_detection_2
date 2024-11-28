@@ -426,5 +426,5 @@ We don't know exactly how it works, or what it's made of. We'll come back to thi
 <!-- ###################################################################### -->
 <!-- ###################################################################### -->
 # What's next ?
-* Go to the directory `04_consumer` and read the [README.md](../04_consumer/README.md) file. 
+* Go to the directory `consumer` and read the [README.md](../02_consumer/README.md) file. 
     * The previous link to the next README.md to read may not work on GitHub but it works like a charm locally in VSCode or a Web browser.

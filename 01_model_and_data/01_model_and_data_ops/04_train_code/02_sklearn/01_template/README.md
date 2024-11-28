@@ -316,7 +316,7 @@ conda install imbalanced-learn
 # What's next ?
 * At this point I consider I have the means to create models, train them and track them on a MLflow Tracking Server.
 * It is time to move on to the next module of the `fraud_detection_2` application
-* Go to the directory `03_producer` and read the [README.md](../../../03_producer/README.md) file. 
+* Go to the directory `03_producer` and read the [README.md](../../../../../02_business/01_application_ops/01_producer/README.md) file. 
     * The previous link to the next README.md to read may not work on GitHub but it works like a charm locally in VSCode or a Web browser.
 
 

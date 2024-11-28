@@ -776,8 +776,8 @@ pipeline {
 <!-- ###################################################################### -->
 # What's next ?
 * If I can find some time, work on a way to discover the modules where tests are available and, if so, run them in a container.
-* Go to the directory `./06_extractor_sql` and read the [README.md](../06_extractor_sql/README.md) file
+* Go to the directory `./01_model_and_data\01_model_and_data_ops\06_extractor_sql` and read the [README.md](../../../01_model_and_data/01_model_and_data_ops/06_extractor_sql/) file
 * The previous link (``README.md``) may not work on GitHub but it works like a charm locally in VSCode or in a Web browser
-* [Try this](https://github.com/40tude/fraud_detection_2/tree/main/06_extractor_sql)
+* [Try this](https://github.com/40tude/fraud_detection_2/tree/main/01_model_and_data/01_model_and_data_ops/06_extractor_sql)
 
 
