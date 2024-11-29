@@ -112,7 +112,7 @@ Start-Process "chrome.exe" -ArgumentList "--new-window", "https://www.example.co
 * …
 * We MUST close the Modelizer before we move to the Consumer demo
 	* Open a new terminal
-	* cd ./01_model_and_data\01_model_and_data_ops\05_modelizer
+	* `cd ./01_model_and_data\01_model_and_data_ops\05_modelizer`
 	* docker compose down
 	* Close the terminal or go back to the previous one.
 
@@ -185,7 +185,7 @@ Start-Process "chrome.exe" -ArgumentList "--new-window", "https://www.example.co
 
 # Start Model Training
 * Navigate to `01_model_and_data\01_model_and_data_ops\04_train_code\02_sklearn\99_smote_random_forest`
-    * cd `cd ./../../../../01_model_and_data\01_model_and_data_ops\04_train_code\02_sklearn\99_smote_random_forest`
+    * `cd ./../../../../01_model_and_data\01_model_and_data_ops\04_train_code\02_sklearn\99_smote_random_forest`
 * Run: `./run_training`
 * Access MLFlow Tracking Server:
     * https://fraud-detection-2-ab95815c7127.herokuapp.com/
@@ -221,5 +221,5 @@ docker compose down (TO DO : marche pas bien…)
 
 
 
-cd `cd ./../../../../../`
+`cd ./../../../../../`
 

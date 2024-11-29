@@ -208,6 +208,7 @@ def create_app() -> Flask:
 
         file_path = os.path.join(k_Reports_Dir, file.filename)
         file.save(file_path)
+        g_logger.info(f"Report saved as : {file_path}")
 
         update_database(k_Reports_Dir)
 
