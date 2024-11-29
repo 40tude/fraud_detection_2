@@ -1,5 +1,8 @@
-# conda activate evidently_no_conda (include flask)
+# In this version, save the report direclty in the SQLite database to get persistency
+
+# conda activate fd2_drift_server_no_docker
 # browse to : http://localhost:5000/report
+
 
 import os
 import sqlite3
@@ -30,29 +33,31 @@ g_logger = logging.getLogger("fraud_detection_2_drift_server")
 
 
 # ----------------------------------------------------------------------
+# See the report_content field
 def create_db() -> None:
-
     g_logger.info(f"{inspect.stack()[0][3]}()")
 
     # Initialize or connect to the SQLite database
     with sqlite3.connect(k_DB_Path) as conn:
         cursor = conn.cursor()
-        # Create the table if it doesn't exist
+        # Create the table with the necessary columns
         cursor.execute(
             """
-        CREATE TABLE IF NOT EXISTS reports (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            report_name TEXT NOT NULL,
-            created_at TIMESTAMP NOT NULL
+            CREATE TABLE reports (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                report_name TEXT NOT NULL,
+                created_at TIMESTAMP NOT NULL,
+                report_content TEXT
+            )
+            """
         )
-        """
-        )
+        g_logger.info("Database and 'reports' table created successfully.")
         conn.commit()
     return
 
 
 # ----------------------------------------------------------------------
-def update_database(report_folder=k_Reports_Dir) -> None:
+def update_database(report_folder: str = k_Reports_Dir) -> None:
 
     g_logger.info(f"{inspect.stack()[0][3]}()")
 
@@ -72,11 +77,22 @@ def update_database(report_folder=k_Reports_Dir) -> None:
                 report_path = os.path.join(report_folder, report)
                 created_at = datetime.fromtimestamp(os.path.getmtime(report_path))
 
-                # Insert new report into the database
-                cursor.execute("INSERT INTO reports (report_name, created_at) VALUES (?, ?)", (report, created_at))
+                # Read the content of the report file
+                with open(report_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+
+                # Insert new report into the database, including its content
+                cursor.execute(
+                    """
+                    INSERT INTO reports (report_name, created_at, report_content)
+                    VALUES (?, ?, ?)
+                    """,
+                    (report, created_at, content),
+                )
                 g_logger.info(f"Added report to database: {report}")
 
         conn.commit()
+    return
 
 
 # ----------------------------------------------------------------------
@@ -164,39 +180,85 @@ def create_app() -> Flask:
 
         return render_template("reports.html", reports=rows, date=date)
 
+    # # ----------------------------------------------------------------------
+    # # Route pour afficher un rapport spécifique
+    # @app.route("/report/<int:report_id>")
+    # def show_report(report_id):
+
+    #     g_logger.info(f"{inspect.stack()[0][3]}()")
+
+    #     # Connexion à la base de données pour obtenir le fichier correspondant
+    #     conn = sqlite3.connect("reports.db")
+    #     cursor = conn.cursor()
+
+    #     with sqlite3.connect(k_DB_Path) as conn:
+    #         cursor = conn.cursor()
+
+    #         # Rechercher le fichier correspondant à l'ID
+    #         cursor.execute("SELECT report_name FROM reports WHERE id = ?", (report_id,))
+    #         result = cursor.fetchone()
+
+    #     if result is None:
+    #         # Si l'ID n'existe pas, retourner une erreur 404
+    #         abort(404, description="Report not found")
+
+    #     # Extraire le nom du fichier
+    #     report_file = result[0]
+
+    #     # Servir le fichier HTML à partir du dossier
+    #     return send_from_directory(k_Reports_Dir, report_file)
+
     # ----------------------------------------------------------------------
     # Route pour afficher un rapport spécifique
     @app.route("/report/<int:report_id>")
     def show_report(report_id):
-
         g_logger.info(f"{inspect.stack()[0][3]}()")
-
-        # Connexion à la base de données pour obtenir le fichier correspondant
-        conn = sqlite3.connect("reports.db")
-        cursor = conn.cursor()
 
         with sqlite3.connect(k_DB_Path) as conn:
             cursor = conn.cursor()
 
-            # Rechercher le fichier correspondant à l'ID
-            cursor.execute("SELECT report_name FROM reports WHERE id = ?", (report_id,))
+            # Retrieve the report content from the database
+            cursor.execute(
+                "SELECT report_name, report_content FROM reports WHERE id = ?",
+                (report_id,),
+            )
             result = cursor.fetchone()
 
         if result is None:
-            # Si l'ID n'existe pas, retourner une erreur 404
             abort(404, description="Report not found")
 
-        # Extraire le nom du fichier
-        report_file = result[0]
+        report_name, report_content = result
 
-        # Servir le fichier HTML à partir du dossier
-        return send_from_directory(k_Reports_Dir, report_file)
+        # Serve the HTML content directly
+        return report_content, 200, {"Content-Type": "text/html"}
+
+    # # ----------------------------------------------------------------------
+    # # Route pour sauver le rapport reçu dans ./reports
+    # @app.route("/upload", methods=["POST"])
+    # def upload_file():
+
+    #     g_logger.info(f"{inspect.stack()[0][3]}()")
+
+    #     if "file" not in request.files:
+    #         return jsonify({"error": "No file part in the request"}), 400
+
+    #     file = request.files["file"]
+    #     if file.filename == "":
+    #         return jsonify({"error": "No selected file"}), 400
+
+    #     file_path = os.path.join(k_Reports_Dir, file.filename)
+    #     file.save(file_path)
+    #     g_logger.info(f"Report saved as : {file_path}")
+
+    #     update_database(k_Reports_Dir)
+
+    #     return jsonify({"message": f"File saved to {file_path}"}), 200
 
     # ----------------------------------------------------------------------
     # Route pour sauver le rapport reçu dans ./reports
+
     @app.route("/upload", methods=["POST"])
     def upload_file():
-
         g_logger.info(f"{inspect.stack()[0][3]}()")
 
         if "file" not in request.files:
@@ -210,7 +272,25 @@ def create_app() -> Flask:
         file.save(file_path)
         g_logger.info(f"Report saved as : {file_path}")
 
-        update_database(k_Reports_Dir)
+        # Save the content to the database
+        with sqlite3.connect(k_DB_Path) as conn:
+            cursor = conn.cursor()
+
+            # Read the HTML content
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            # Insert the report with its content
+            cursor.execute(
+                """
+                INSERT INTO reports (report_name, created_at, report_content)
+                VALUES (?, ?, ?)
+                """,
+                (file.filename, datetime.now(), content),
+            )
+            g_logger.info(f"Saved report '{file.filename}' to the database.")
+
+            conn.commit()
 
         return jsonify({"message": f"File saved to {file_path}"}), 200
 
