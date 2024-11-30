@@ -39,7 +39,7 @@ Cliquer sur Heroku PostgreSQL
 <img src="./assets/img02.png" alt="drawing" width="800"/>
 <p>
 
-lick on Settings 
+Click on Settings 
 View credentials.
 <p align="center">
 <img src="./assets/img03.png" alt="drawing" width="800"/>

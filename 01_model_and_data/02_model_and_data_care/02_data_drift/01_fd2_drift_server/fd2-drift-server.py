@@ -1,21 +1,40 @@
-# In this version, save the report direclty in the SQLite database to get persistency
+# On WIN11
+#   conda activate fd2_drift_server_no_docker
+#   Browse to : http://localhost:5000/report
 
-# conda activate fd2_drift_server_no_docker
-# browse to : http://localhost:5000/report
+# In this version, save the report directly in the SQLite database to get persistency but...
+# It does'nt work on Heroku (works like a charm on WIN11 host)
+# Again : on Heroku there is no way to save locally
+# We can :
+#   1. Save on AWS S3
+#   2. Use PostgreSQL <-- This is what we do here  
 
 
+# Add a Postgresql to the fd2_drift_server on Heroku
+# Add a Config Var named DRIFT_SERVER_SQL_URI with postgresql://u76st...
+# In secrets.ps1 add a line $env:DRIFT_SERVER_SQL_URI = "postgresql://u76st...
+
+#```powershell
+#conda install psycopg2-binary sqlalchemy -c conda-forge -y
+#conda install sqlalchemy -c conda-forge -y
+#```
+
+# In requirements.txt, add  
+# psycopg2-binary
+# sqlalchemy
+
+# Comment  the # import sqlite3
+
+
+# ----------------------------------------------------------------------
 import os
-import sqlite3
-import inspect
-from datetime import datetime
-from pathlib import Path
-
 import logging
-
-from flask import Flask, jsonify, request, render_template, abort, send_from_directory, jsonify
+# import sqlite3
+import inspect
+from pathlib import Path
 from datetime import datetime
-import sqlite3
-
+from sqlalchemy import create_engine
+from flask import Flask, jsonify, request, render_template, abort      #, send_from_directory
 
 # ----------------------------------------------------------------------
 k_DB_Path = "./reports.db"
@@ -100,7 +119,6 @@ def update_database(report_folder: str = k_Reports_Dir) -> None:
 def init_db() -> None:
     """Initialize the SQLite database, creating it if it doesn't exist."""
 
-    # app.logger.info(f"{inspect.stack()[0][3]}()")
     g_logger.info(f"{inspect.stack()[0][3]}()")
 
     if not os.path.exists(k_DB_Path):
@@ -180,33 +198,6 @@ def create_app() -> Flask:
 
         return render_template("reports.html", reports=rows, date=date)
 
-    # # ----------------------------------------------------------------------
-    # # Route pour afficher un rapport spécifique
-    # @app.route("/report/<int:report_id>")
-    # def show_report(report_id):
-
-    #     g_logger.info(f"{inspect.stack()[0][3]}()")
-
-    #     # Connexion à la base de données pour obtenir le fichier correspondant
-    #     conn = sqlite3.connect("reports.db")
-    #     cursor = conn.cursor()
-
-    #     with sqlite3.connect(k_DB_Path) as conn:
-    #         cursor = conn.cursor()
-
-    #         # Rechercher le fichier correspondant à l'ID
-    #         cursor.execute("SELECT report_name FROM reports WHERE id = ?", (report_id,))
-    #         result = cursor.fetchone()
-
-    #     if result is None:
-    #         # Si l'ID n'existe pas, retourner une erreur 404
-    #         abort(404, description="Report not found")
-
-    #     # Extraire le nom du fichier
-    #     report_file = result[0]
-
-    #     # Servir le fichier HTML à partir du dossier
-    #     return send_from_directory(k_Reports_Dir, report_file)
 
     # ----------------------------------------------------------------------
     # Route pour afficher un rapport spécifique
@@ -232,27 +223,6 @@ def create_app() -> Flask:
         # Serve the HTML content directly
         return report_content, 200, {"Content-Type": "text/html"}
 
-    # # ----------------------------------------------------------------------
-    # # Route pour sauver le rapport reçu dans ./reports
-    # @app.route("/upload", methods=["POST"])
-    # def upload_file():
-
-    #     g_logger.info(f"{inspect.stack()[0][3]}()")
-
-    #     if "file" not in request.files:
-    #         return jsonify({"error": "No file part in the request"}), 400
-
-    #     file = request.files["file"]
-    #     if file.filename == "":
-    #         return jsonify({"error": "No selected file"}), 400
-
-    #     file_path = os.path.join(k_Reports_Dir, file.filename)
-    #     file.save(file_path)
-    #     g_logger.info(f"Report saved as : {file_path}")
-
-    #     update_database(k_Reports_Dir)
-
-    #     return jsonify({"message": f"File saved to {file_path}"}), 200
 
     # ----------------------------------------------------------------------
     # Route pour sauver le rapport reçu dans ./reports
