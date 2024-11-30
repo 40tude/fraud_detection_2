@@ -54,9 +54,19 @@ k_Reports_Dir = "./reports"
 
 k_table_name = "reports"
 
+# SQLite
+# k_SQL_Create_Table = f"""
+# CREATE TABLE {k_table_name} (
+#     id INTEGER PRIMARY KEY AUTOINCREMENT,
+#     report_name TEXT NOT NULL,
+#     created_at TIMESTAMP NOT NULL,
+#     report_content TEXT
+# );"""
+
+# PostgreSQL
 k_SQL_Create_Table = f"""
 CREATE TABLE {k_table_name} (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     report_name TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL,
     report_content TEXT
@@ -153,18 +163,8 @@ g_logger.addHandler(stream_handler)
 
 # ----------------------------------------------------------------------
 def extract_created_at_from_filename(filename: str) -> datetime:
-    """
-    Extracts the creation timestamp from a filename in the format: 'data_drift_report_YYYYMMJJ_HHMMSS.html'.
+    g_logger.info(f"{inspect.stack()[0][3]}()")
 
-    Args:
-        filename (str): The name of the file.
-
-    Returns:
-        datetime: A datetime object corresponding to the extracted timestamp.
-
-    Raises:
-        ValueError: If the filename does not contain a valid timestamp.
-    """
     match = re.search(r"_(\d{8}_\d{6})\.html$", filename)
     if not match:
         raise ValueError(f"Filename '{filename}' does not match the expected format.")
@@ -175,42 +175,9 @@ def extract_created_at_from_filename(filename: str) -> datetime:
 
 # ----------------------------------------------------------------------
 # def update_database(engine: Engine, report_folder: str = k_Reports_Dir) -> None:
-#     """
-#     Updates the PostgreSQL database with the list of report files in the specified folder.
-#     """
-#     g_logger.info(f"{inspect.stack()[0][3]}()")
-
-#     # List all reports in the folder
-#     report_files = os.listdir(report_folder)
-
-#     with engine.connect() as conn:
-#         # Get already recorded reports from the database
-#         result = conn.execute(text("SELECT report_name FROM reports"))
-#         existing_reports = set(row["report_name"] for row in result)
-
-#         for report in report_files:
-#             if report not in existing_reports:
-#                 # Extract timestamp from the file name or use the file creation time
-#                 report_path = os.path.join(report_folder, report)
-#                 created_at = datetime.fromtimestamp(os.path.getmtime(report_path))
-
-#                 # Read the content of the report file
-#                 with open(report_path, "r", encoding="utf-8") as f:
-#                     content = f.read()
-
-#                 # Insert new report into the database, including its content
-#                 conn.execute(
-#                     text("""
-#                         INSERT INTO reports (report_name, created_at, report_content)
-#                         VALUES (:report_name, :created_at, :report_content)
-#                     """),
-#                     {"report_name": report, "created_at": created_at, "report_content": content},
-#                 )
-#                 g_logger.info(f"Added report to database: {report}")
-#                 # os.remove(report_path)
-#                 # g_logger.info(f"{report_path} is removed")
 
 def update_database(engine, report_folder: str = k_Reports_Dir) -> None:
+    
     g_logger.info(f"{inspect.stack()[0][3]}()")
 
     report_files = os.listdir(report_folder)
@@ -252,11 +219,16 @@ def update_database(engine, report_folder: str = k_Reports_Dir) -> None:
 # -----------------------------------------------------------------------------
 def check_table_exist(engine, table_name: str) -> bool:
 
+    g_logger.info(f"{inspect.stack()[0][3]}()")
+
     inspector = sqlalchemy_inspect(engine)
     return inspector.has_table(table_name)
 
 # -----------------------------------------------------------------------------
 def create_table(engine) -> None:
+    
+    g_logger.info(f"{inspect.stack()[0][3]}()")
+
     try:
         with engine.connect() as conn:
             conn.execute(text(k_SQL_Create_Table))
@@ -268,8 +240,7 @@ def create_table(engine) -> None:
 # ----------------------------------------------------------------------
 # PostgreSQL database setup
 def init_db() -> Engine:
-    """Initialize the SQLite database, creating it if it doesn't exist."""
-
+ 
     g_logger.info(f"{inspect.stack()[0][3]}()")
 
     # if not os.path.exists(k_DB_Path):
@@ -295,6 +266,8 @@ def init_db() -> Engine:
 # create_app() function is the entry point which configure the Flask app before it runs
 # double check the content of Procfile file
 def create_app() -> Flask:
+
+    g_logger.info(f"{inspect.stack()[0][3]}()")
 
     app = Flask(__name__)
     app.logger.info(f"{inspect.stack()[0][3]}()")
