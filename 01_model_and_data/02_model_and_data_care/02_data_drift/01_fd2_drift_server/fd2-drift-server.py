@@ -40,7 +40,7 @@
 # config:set FLASK_DEBUG=True (heroku ps:restart si besoin)
 # Voir create_app() et app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
 # Procfile
-# web: python -m flask run --host=0.0.0.0 --port=$PORT
+# web: python -m flask --app fd2-drift-server run --host=0.0.0.0 --port=$PORT
 # Comprendre qu'on va passer par le main ce qui permet à Flask d'utiliser son propre serveur intégré
 
 # PRODUCTION
