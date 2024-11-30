@@ -1,1 +1,1 @@
-web: gunicorn --workers=3 'fd2-drift-server:create_app()'
+web: python -m flask --app fd2-drift-server run --host=0.0.0.0 --port=$PORT

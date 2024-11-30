@@ -36,14 +36,20 @@
 # Faut pousser direct sur Heroku
 # Faire la difference en DEBUG et PRODUCTION
 
-# DEBUG 
-# heroku config:set FLASK_DEBUG=False --app fd2-drift-server (heroku ps:restart si besoin)
-# Voir create_app() et app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
+
+
+# DEBUG ----------------------------------------------------------------------- 
 # Procfile
 # web: python -m flask --app fd2-drift-server run --host=0.0.0.0 --port=$PORT
 # Comprendre qu'on va passer par le main ce qui permet à Flask d'utiliser son propre serveur intégré
+#
+# heroku config:set FLASK_DEBUG=False --app fd2-drift-server (heroku ps:restart si besoin)
+#
+# Voir create_app() et app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
 
-# PRODUCTION
+
+
+# PRODUCTION ------------------------------------------------------------------
 # Procfile
 # web: gunicorn --workers=3 'fd2-drift-server:create_app()'
 # # Comprendre qu'on va utiliser nginx, plus passer par main mais par create_app()
@@ -75,7 +81,6 @@ from sqlalchemy import create_engine, text, inspect as sqlalchemy_inspect, Engin
 from flask import Flask, jsonify, request, render_template, abort      #, send_from_directory
 
 # ----------------------------------------------------------------------
-# k_DB_Path = "./reports.db"
 k_Reports_Dir = "./reports"
 k_table_name = "reports"
 
@@ -98,6 +103,14 @@ CREATE TABLE {k_table_name} (
 );"""
 
 
+# ----------------------------------------------------------------------
+# Global logger - Default minimal configuration
+# DEBUG INFO WARNING ERROR CRITICAL
+g_logger = logging.getLogger("fraud_detection_2_drift_server")
+g_logger.setLevel(logging.WARNING)  # Minimal level to prevent unwanted logs
+if not g_logger.hasHandlers():
+    g_logger.addHandler(logging.NullHandler())  # Prevent errors before setup
+
 
 # ----------------------------------------------------------------------
 # Global logger
@@ -108,26 +121,46 @@ CREATE TABLE {k_table_name} (
 # #     datefmt='%Y-%m-%d %H:%M:%S'
 # # )
 # g_logger = logging.getLogger("fraud_detection_2_drift_server")
+def set_up_logger(app:Flask, debug_level:bool=True)->None:
+    
+    global g_logger
 
-# Global logger
-g_logger = logging.getLogger("fraud_detection_2_drift_server")
-g_logger.setLevel(logging.INFO)
+    # Stream handler for console and Heroku
+    stream_handler = logging.StreamHandler(sys.stdout)
 
-# Create a StreamHandler for Heroku logs
-stream_handler = logging.StreamHandler(sys.stdout)
-stream_handler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-stream_handler.setFormatter(formatter)
+    # Pour avoir des niveaux de logs différents en local (par exemple DEBUG) et en production (INFO)
+    # Configurer le niveau de logs dynamiquement :
+    log_level = logging.DEBUG if debug_level else logging.INFO
+    stream_handler.setLevel(log_level)
+    
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    stream_handler.setFormatter(formatter)
 
-# Add the handler to your logger
-g_logger.addHandler(stream_handler)
-g_logger.info("=== NEW SESSION START ===")
+    # Avoid adding multiple handlers if this function is called again
+    if not any(isinstance(h, logging.StreamHandler) for h in g_logger.handlers):
+        g_logger.addHandler(stream_handler)
 
+    # Set the global logger level
+    g_logger.setLevel(log_level)
+
+    
+    
+    # Redirect Flask logs to the global logger (only if Gunicorn is available)
+    gunicorn_logger = logging.getLogger("gunicorn.error")
+    if gunicorn_logger.handlers:
+        app.logger.handlers = gunicorn_logger.handlers  # Use Gunicorn's log handlers on Heroku
+        app.logger.setLevel(g_logger.level)  # Align Flask log level with g_logger
+
+    g_logger.info("=== NEW SESSION START ===")
+    g_logger.info(f"DEBUG mode is {'ON' if app.config['DEBUG'] else 'OFF'}")
+
+    return
 
 
 # ----------------------------------------------------------------------
 def extract_created_at_from_filename(filename: str) -> datetime:
-    g_logger.info(f"{inspect.stack()[0][3]}()")
+    
+    g_logger.debug(f"{inspect.stack()[0][3]}()")
 
     match = re.search(r"_(\d{8}_\d{6})\.html$", filename)
     if not match:
@@ -141,7 +174,7 @@ def extract_created_at_from_filename(filename: str) -> datetime:
 # ----------------------------------------------------------------------
 def update_database(engine: Engine, report_folder: str = k_Reports_Dir) -> None:
     
-    g_logger.info(f"{inspect.stack()[0][3]}()")
+    g_logger.debug(f"{inspect.stack()[0][3]}()")
 
     report_files = os.listdir(report_folder)
 
@@ -155,7 +188,7 @@ def update_database(engine: Engine, report_folder: str = k_Reports_Dir) -> None:
                 try:
                     created_at = extract_created_at_from_filename(report)
                 except ValueError as e:
-                    g_logger.warning(f"Skipping file '{report}': {e}")
+                    g_logger.info(f"Skipping file '{report}': {e}")
                     continue # this report is skipped
 
                 # Read the report content
@@ -185,7 +218,7 @@ def update_database(engine: Engine, report_folder: str = k_Reports_Dir) -> None:
 # -----------------------------------------------------------------------------
 def check_table_exist(engine, table_name: str) -> bool:
 
-    g_logger.info(f"{inspect.stack()[0][3]}() - Checking table '{table_name}' existence")
+    g_logger.debug(f"{inspect.stack()[0][3]}() - Checking table '{table_name}' existence")
     inspector = sqlalchemy_inspect(engine)
     exists = inspector.has_table(table_name)
     g_logger.info(f"Table '{table_name}' exists: {exists}")
@@ -196,14 +229,13 @@ def check_table_exist(engine, table_name: str) -> bool:
     #     conn.commit()
     #     g_logger.info(f"Table '{k_table_name}' deleted.")
     # exists = inspector.has_table(table_name)
-
-    g_logger.info(f"Table '{table_name}' exists: {exists}")
+    # g_logger.info(f"Table '{table_name}' exists: {exists}")
     return exists
 
 # -----------------------------------------------------------------------------
 def create_table(engine) -> None:
     
-    g_logger.info(f"{inspect.stack()[0][3]}() - Creating table '{k_table_name}'")
+    g_logger.debug(f"{inspect.stack()[0][3]}() - Creating table '{k_table_name}'")
     try:
         with engine.connect() as conn:
 
@@ -218,7 +250,7 @@ def create_table(engine) -> None:
 # PostgreSQL database setup
 def init_db() -> Engine:
  
-    g_logger.info(f"{inspect.stack()[0][3]}()")
+    g_logger.debug(f"{inspect.stack()[0][3]}()")
 
     database_url = os.getenv("DRIFT_SERVER_SQL_URI")
     engine = create_engine(database_url)
@@ -233,25 +265,32 @@ def init_db() -> Engine:
     return engine
 
 
+
+
 # ----------------------------------------------------------------------
 # create_app() function is the entry point which configure the Flask app before it runs
 # double check the content of Procfile file
 def create_app() -> Flask:
 
-    g_logger.info(f"{inspect.stack()[0][3]}()")
-
     app = Flask(__name__)
-    # Sur Heroku ou avec Gunicorn. Utilise app.config["DEBUG"] = True car app.run() n’est pas directement invoqué. Gunicorn contrôle le démarrage de l’application.
-    # En local avec Flask uniquement : app.run(debug=True) est suffisant pour activer le mode debug pendant les tests. Mais bon ici le code fonctionne en local ET sur Heroku
-    # FLASK_DEBUG à definir sur Heroku ou avec heroku config:set FLASK_DEBUG=True
-    app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
-    app.logger.info(f"DEBUG mode is {'ON' if app.config['DEBUG'] else 'OFF'}")
 
-    app.logger.info(f"{inspect.stack()[0][3]}()")
-    # If you run the app locally you must run ./secrets.ps1 first (see above)
+    # Sur Heroku ou avec Gunicorn. 
+    # Utilise app.config["DEBUG"] = True car app.run() n’est pas directement invoqué. Gunicorn contrôle le démarrage de l’application.
+    # En local avec Flask uniquement : app.run(debug=True) serait suffisant pour activer le mode debug pendant les tests. 
+    # Mais bon ici le code fonctionne en local ET sur Heroku
+    # FLASK_DEBUG est à definir sur Heroku ou avec heroku config:set FLASK_DEBUG=True
+    # En local faut utiliser secrtes.ps1
+    app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
+    
+    set_up_logger(app, app.config["DEBUG"])
+    
+    g_logger.debug(f"{inspect.stack()[0][3]}()")
+
+    # If you run the app locally you must run ./secrets.ps1 first 
     # In production on Heroku DRIFT_SERVER_SECRET_KEY must have been set manually (see readme.md)
     # Without session key, Flask does not allow the app to set or access the session dictionary
     app.secret_key = os.environ.get("DRIFT_SERVER_SECRET_KEY")
+
 
     with app.app_context():
         engine = init_db()  # Initialise la base de données quand l'application est créée
@@ -262,14 +301,14 @@ def create_app() -> Flask:
     # Route pour afficher la page d'accueil avec le calendrier
     @app.route("/")
     def index():
-        g_logger.info(f"{inspect.stack()[0][3]}()")
+        g_logger.debug(f"{inspect.stack()[0][3]}()")
         return render_template("index.html")
 
     # ----------------------------------------------------------------------
     # Route pour récupérer les rapports sous forme d'événements JSON
     @app.route("/get_reports")
     def get_reports():
-        g_logger.info(f"{inspect.stack()[0][3]}()")
+        g_logger.debug(f"{inspect.stack()[0][3]}()")
 
         with engine.connect() as conn:
             # Récupérer tous les rapports
@@ -295,7 +334,7 @@ def create_app() -> Flask:
     # Route pour afficher les rapports d'une date spécifique
     @app.route("/reports")
     def reports_by_date():
-        g_logger.info(f"{inspect.stack()[0][3]}()")
+        g_logger.debug(f"{inspect.stack()[0][3]}()")
         date = request.args.get("date")
 
         with engine.connect() as conn:
@@ -316,7 +355,7 @@ def create_app() -> Flask:
     # Route pour afficher un rapport spécifique
     @app.route("/report/<int:report_id>")
     def show_report(report_id):
-        g_logger.info(f"{inspect.stack()[0][3]}()")
+        g_logger.debug(f"{inspect.stack()[0][3]}()")
 
         with engine.connect() as conn:
             # Retrieve the report content from the database
@@ -343,7 +382,7 @@ def create_app() -> Flask:
     # On ne sauvegarde plus rien dans ./reports
     @app.route("/upload", methods=["POST"])
     def upload_file():
-        g_logger.info(f"{inspect.stack()[0][3]}()")
+        g_logger.debug(f"{inspect.stack()[0][3]}()")
 
         if "file" not in request.files:
             return jsonify({"error": "No file part in the request"}), 400
