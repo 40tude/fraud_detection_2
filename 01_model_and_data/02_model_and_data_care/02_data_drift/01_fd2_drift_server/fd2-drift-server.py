@@ -34,8 +34,25 @@
 
 # J'ai pas de serveur PostgreSQL en local
 # Faut pousser direct sur Heroku
+# Faire la difference en DEBUG et PRODUCTION
 
+# DEBUG 
+# config:set FLASK_DEBUG=True (heroku ps:restart si besoin)
+# Voir create_app() et app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
+# Procfile
+# web: python -m flask run --host=0.0.0.0 --port=$PORT
+# 
 
+# PRODUCTION
+# config:set FLASK_DEBUG=False
+# Voir create_app() et app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
+# Procfile
+# web: gunicorn --workers=3 'fd2-drift-server:create_app()'
+# 
+# Remplacer app.run(debug=True) par app.run() dans main()
+# Ajouter app.config["DEBUG"] = True dans create_app()
+# Faudra l'enlever en mode "production" 
+#   
 # ----------------------------------------------------------------------
 import os
 import re
@@ -207,6 +224,12 @@ def create_app() -> Flask:
     g_logger.info(f"{inspect.stack()[0][3]}()")
 
     app = Flask(__name__)
+    # Sur Heroku ou avec Gunicorn. Utilise app.config["DEBUG"] = True car app.run() n’est pas directement invoqué. Gunicorn contrôle le démarrage de l’application.
+    # En local avec Flask uniquement : app.run(debug=True) est suffisant pour activer le mode debug pendant les tests. Mais bon ici le code fonctionne en local ET sur Heroku
+    # FLASK_DEBUG à definir sur Heroku ou avec heroku config:set FLASK_DEBUG=True
+    app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
+    app.logger.info(f"DEBUG mode is {'ON' if app.config['DEBUG'] else 'OFF'}")
+
     app.logger.info(f"{inspect.stack()[0][3]}()")
     # If you run the app locally you must run ./secrets.ps1 first (see above)
     # In production on Heroku DRIFT_SERVER_SECRET_KEY must have been set manually (see readme.md)
@@ -465,4 +488,7 @@ if __name__ == "__main__":
 
     app = create_app()
     g_logger.info("main()")
-    app.run(debug=True)
+    # app.run(debug=True) inutile voir create_app() et app.config["DEBUG"] = ...
+    app.run()
+
+    
