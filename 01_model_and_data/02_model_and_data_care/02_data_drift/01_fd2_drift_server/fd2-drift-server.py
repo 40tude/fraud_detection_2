@@ -114,7 +114,7 @@ stream_handler.setFormatter(formatter)
 
 # Add the handler to your logger
 g_logger.addHandler(stream_handler)
-
+g_logger.info("=== NEW SESSION START ===")
 
 
 
@@ -159,6 +159,11 @@ def update_database(engine, report_folder: str = k_Reports_Dir) -> None:
                 report_path = os.path.join(report_folder, report)
                 with open(report_path, "r", encoding="utf-8") as f:
                     content = f.read()
+                    g_logger.info(f"Content of {report}: {content[:100]}...")  # Log only the first 100 chars
+
+                if not content.strip():
+                    g_logger.warning(f"File {report} is empty or could not be read correctly!")
+                    continue  # Skip this file
 
                 # Insert the report into the database
                 conn.execute(
@@ -267,8 +272,9 @@ def create_app() -> Flask:
             # Récupérer tous les rapports
             result = conn.execute(
                 text("SELECT id, report_name, created_at FROM reports")
-            )
-            rows = result.fetchall()
+            ).execution_options(stream_results=True)
+            # rows = result.fetchall()
+            rows = [dict(row) for row in result]  # Convert to dicts
 
         # Formater les rapports pour FullCalendar
         events = [
@@ -360,6 +366,7 @@ def create_app() -> Flask:
                     "report_content": content,
                 }
             )
+            conn.commit()  # Ajout explicite du commit
             g_logger.info(f"Saved report '{file.filename}' to the database.")
 
         return jsonify({"message": f"Report '{file.filename}' saved to database."}), 200
