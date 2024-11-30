@@ -64,8 +64,8 @@ k_Fraud_Test_csv = k_Fraud_Test_csv_Local
 # Set k_Drift_Server_URL equal to k_Drift_Server_Local OR k_Drift_Server_Heroku OR ...
 k_Drift_Server_Local = "http://127.0.0.1:5000"
 k_Drift_Server_Heroku = "https://fd2-drift-server-485e8a3514d2.herokuapp.com/"
-k_Drift_Server_URL = k_Drift_Server_Local
-# k_Drift_Server_URL = k_Drift_Server_Heroku
+# k_Drift_Server_URL = k_Drift_Server_Local
+k_Drift_Server_URL = k_Drift_Server_Heroku
 
 k_Drift_Server_upload_URL = f"{k_Drift_Server_URL}/upload"
 k_Report_Link = f"{k_Drift_Server_URL}/reports?date="

@@ -353,7 +353,7 @@ def create_app() -> Flask:
         content = file.read().decode("utf-8")  # Decode bytes to string
 
         # Save the report to the database
-        with engine.connect() as conn:
+        with engine.begin() as conn:
             conn.execute(
                 text("""
                     INSERT INTO reports (report_name, created_at, report_content)
@@ -365,7 +365,6 @@ def create_app() -> Flask:
                     "report_content": content,
                 }
             )
-            conn.commit()  # Ajout explicite du commit
             g_logger.info(f"Saved report '{file.filename}' to the database.")
 
         return jsonify({"message": f"Report '{file.filename}' saved to database."}), 200
