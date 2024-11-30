@@ -124,6 +124,7 @@ def extract_created_at_from_filename(filename: str) -> datetime:
 
     match = re.search(r"_(\d{8}_\d{6})\.html$", filename)
     if not match:
+        g_logger.info(f"{filename} : {filename}' does not match the expected format")
         raise ValueError(f"Filename '{filename}' does not match the expected format.")
 
     timestamp_str = match.group(1)  # Extract the YYYYMMJJ_HHMMSS part
@@ -188,8 +189,10 @@ def create_table(engine) -> None:
         with engine.connect() as conn:
             # TODO : à virer
             conn.execute(text(f"DROP TABLE IF EXISTS {k_table_name}"))
+            g_logger.info(f"Table '{k_table_name}' deleted.")
+
             conn.execute(text(k_SQL_Create_Table))
-            g_logger.info(f"Table '{k_table_name}' created successfully.")
+            g_logger.info(f"Table '{k_table_name}' re-created successfully.")
             conn.commit()
     except SQLAlchemyError as error:
         g_logger.error(f"Error creating table '{k_table_name}': {error}")
