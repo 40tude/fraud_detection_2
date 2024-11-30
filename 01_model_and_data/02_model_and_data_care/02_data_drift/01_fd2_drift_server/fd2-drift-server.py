@@ -324,7 +324,7 @@ def create_app() -> Flask:
                     WHERE id = :report_id
                 """),
                 {"report_id": report_id},
-            ).fetchone()
+            ).mappings().fetchone()
 
         if result is None:
             abort(404, description="Report not found")
