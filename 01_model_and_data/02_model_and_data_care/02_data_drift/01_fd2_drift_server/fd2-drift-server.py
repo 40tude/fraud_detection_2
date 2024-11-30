@@ -7,58 +7,22 @@
 # Again : on Heroku there is no way to save locally
 # We can :
 #   1. Save on AWS S3
-#   2. Use PostgreSQL <-- This is what we do here  
+#   2. Use PostgreSQL  
 
-
-# Add a Postgresql to the fd2_drift_server on Heroku
-# Add a Config Var named DRIFT_SERVER_SQL_URI with postgresql://u76st...
-# In secrets.ps1 add a line $env:DRIFT_SERVER_SQL_URI = "postgresql://u76st...
-
-#```powershell
-#conda install psycopg2-binary sqlalchemy -c conda-forge -y
-#conda install sqlalchemy -c conda-forge -y
-#```
-
-# In requirements.txt, add  
-# psycopg2-binary
-# sqlalchemy
-# pip list --format=freeze > requirements.txt
-# Add gunicorn==23.0.0 at the very end
-
-# delete reports.db
-
-# Comment the # import sqlite3
-
-# Push du projet fraud_detection_2 sur GitHub
-# DEPUIS LA RACINE du projet fraud_detection_2 : git subtree push --prefix 01_model_and_data/02_model_and_data_care/02_data_drift/01_fd2_drift_server heroku main
 
 
 # ----------------------------------------------------------------------
 import os
 import logging
-# import sqlite3
+import sqlite3
 import inspect
 from pathlib import Path
 from datetime import datetime
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import create_engine, inspect, text, Engine
 from flask import Flask, jsonify, request, render_template, abort      #, send_from_directory
 
 # ----------------------------------------------------------------------
-# k_DB_Path = "./reports.db"
+k_DB_Path = "./reports.db"
 k_Reports_Dir = "./reports"
-
-k_table_name = "reports"
-
-k_SQL_Create_Table = f"""
-CREATE TABLE {k_table_name} (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    report_name TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    report_content TEXT
-);"""
-
-
 
 # ----------------------------------------------------------------------
 # Global logger
@@ -73,81 +37,42 @@ g_logger = logging.getLogger("fraud_detection_2_drift_server")
 
 # ----------------------------------------------------------------------
 # See the report_content field
-# def create_db() -> None:
-#     g_logger.info(f"{inspect.stack()[0][3]}()")
-
-#     # Initialize or connect to the SQLite database
-#     with sqlite3.connect(k_DB_Path) as conn:
-#         cursor = conn.cursor()
-#         # Create the table with the necessary columns
-#         cursor.execute(
-#             f"""
-#             CREATE TABLE {k_table_name} (
-#                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-#                 report_name TEXT NOT NULL,
-#                 created_at TIMESTAMP NOT NULL,
-#                 report_content TEXT
-#             )
-#             """
-#         )
-#         g_logger.info(f"Database and '{k_table_name}' table created successfully.")
-#         conn.commit()
-#     return
-
-
-# ----------------------------------------------------------------------
-# def update_database(report_folder: str = k_Reports_Dir) -> None:
-
-#     g_logger.info(f"{inspect.stack()[0][3]}()")
-
-#     with sqlite3.connect(k_DB_Path) as conn:
-#         cursor = conn.cursor()
-
-#         # List all reports in the folder
-#         report_files = os.listdir(report_folder)
-
-#         # Get already recorded reports from the database
-#         cursor.execute("SELECT report_name FROM reports")
-#         existing_reports = set(row[0] for row in cursor.fetchall())
-
-#         for report in report_files:
-#             if report not in existing_reports:
-#                 # Extract timestamp from the file name or use the file creation time
-#                 report_path = os.path.join(report_folder, report)
-#                 created_at = datetime.fromtimestamp(os.path.getmtime(report_path))
-
-#                 # Read the content of the report file
-#                 with open(report_path, "r", encoding="utf-8") as f:
-#                     content = f.read()
-
-#                 # Insert new report into the database, including its content
-#                 cursor.execute(
-#                     """
-#                     INSERT INTO reports (report_name, created_at, report_content)
-#                     VALUES (?, ?, ?)
-#                     """,
-#                     (report, created_at, content),
-#                 )
-#                 g_logger.info(f"Added report to database: {report}")
-
-#         conn.commit()
-#     return
-
-
-# ----------------------------------------------------------------------
-def update_database(engine: Engine, report_folder: str = k_Reports_Dir) -> None:
-    """
-    Updates the PostgreSQL database with the list of report files in the specified folder.
-    """
+def create_db() -> None:
     g_logger.info(f"{inspect.stack()[0][3]}()")
 
-    # List all reports in the folder
-    report_files = os.listdir(report_folder)
+    # Initialize or connect to the SQLite database
+    with sqlite3.connect(k_DB_Path) as conn:
+        cursor = conn.cursor()
+        # Create the table with the necessary columns
+        cursor.execute(
+            """
+            CREATE TABLE reports (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                report_name TEXT NOT NULL,
+                created_at TIMESTAMP NOT NULL,
+                report_content TEXT
+            )
+            """
+        )
+        g_logger.info("Database and 'reports' table created successfully.")
+        conn.commit()
+    return
 
-    with engine.connect() as conn:
+
+# ----------------------------------------------------------------------
+def update_database(report_folder: str = k_Reports_Dir) -> None:
+
+    g_logger.info(f"{inspect.stack()[0][3]}()")
+
+    with sqlite3.connect(k_DB_Path) as conn:
+        cursor = conn.cursor()
+
+        # List all reports in the folder
+        report_files = os.listdir(report_folder)
+
         # Get already recorded reports from the database
-        result = conn.execute(text("SELECT report_name FROM reports"))
-        existing_reports = set(row["report_name"] for row in result)
+        cursor.execute("SELECT report_name FROM reports")
+        existing_reports = set(row[0] for row in cursor.fetchall())
 
         for report in report_files:
             if report not in existing_reports:
@@ -160,60 +85,31 @@ def update_database(engine: Engine, report_folder: str = k_Reports_Dir) -> None:
                     content = f.read()
 
                 # Insert new report into the database, including its content
-                conn.execute(
-                    text("""
-                        INSERT INTO reports (report_name, created_at, report_content)
-                        VALUES (:report_name, :created_at, :report_content)
-                    """),
-                    {"report_name": report, "created_at": created_at, "report_content": content},
+                cursor.execute(
+                    """
+                    INSERT INTO reports (report_name, created_at, report_content)
+                    VALUES (?, ?, ?)
+                    """,
+                    (report, created_at, content),
                 )
                 g_logger.info(f"Added report to database: {report}")
-                # os.remove(report_path)
-                # g_logger.info(f"{report_path} is removed")
 
-
-
-
-# -----------------------------------------------------------------------------
-def check_table_exist(engine, table_name: str) -> bool:
-
-    inspector = inspect(engine)
-    return inspector.has_table(table_name)
-
-# -----------------------------------------------------------------------------
-def create_table(engine) -> None:
-    try:
-        with engine.connect() as conn:
-            conn.execute(text(k_SQL_Create_Table))
-            conn.commit()
-    except SQLAlchemyError as error:
-        print(f"An error occurred: {error}")
+        conn.commit()
+    return
 
 
 # ----------------------------------------------------------------------
-# PostgreSQL database setup
-def init_db() -> Engine:
+# SQLite database setup
+def init_db() -> None:
     """Initialize the SQLite database, creating it if it doesn't exist."""
 
     g_logger.info(f"{inspect.stack()[0][3]}()")
 
-    # if not os.path.exists(k_DB_Path):
-    #     create_db()
+    if not os.path.exists(k_DB_Path):
+        create_db()
 
-    # # Call the function to update the database
-    # update_database(k_Reports_Dir)
-
-    database_url = os.getenv("DRIFT_SERVER_SQL_URI")
-    engine = create_engine(database_url)
-    bExist = check_table_exist(engine, k_table_name)
-    if not bExist:
-        create_table(engine)
-        g_logger.info("The table has been created")
-        update_database(engine)
-        g_logger.info("The table has been updated")
-    else:
-        g_logger.info("The table already exists")
-    return engine
+    # Call the function to update the database
+    update_database(k_Reports_Dir)
 
 
 # ----------------------------------------------------------------------
@@ -229,7 +125,7 @@ def create_app() -> Flask:
     app.secret_key = os.environ.get("DRIFT_SERVER_SECRET_KEY")
 
     with app.app_context():
-        engine = init_db()  # Initialise la base de données quand l'application est créée
+        init_db()  # Initialise la base de données quand l'application est créée
 
     # Route must be defined inside create_app() otherwise "app" is not yet defined
     # ----------------------------------------------------------------------
@@ -242,179 +138,78 @@ def create_app() -> Flask:
 
     # ----------------------------------------------------------------------
     # Route pour récupérer les rapports sous forme d'événements JSON
-    # @app.route("/get_reports")
-    # def get_reports():
-    #     g_logger.info(f"{inspect.stack()[0][3]}()")
-
-    #     with sqlite3.connect(k_DB_Path) as conn:
-    #         cursor = conn.cursor()
-
-    #         # Récupérer tous les rapports
-    #         cursor.execute("SELECT id, report_name, created_at FROM reports")
-    #         rows = cursor.fetchall()
-
-    #     # Formater les rapports pour FullCalendar
-    #     events = [
-    #         {
-    #             "title": f"Report: {row[1]}",
-    #             "start": row[2],  # Format ISO (YYYY-MM-DDTHH:mm:ss)
-    #             "url": f"/report/{row[0]}",  # Lien vers le détail du rapport
-    #         }
-    #         for row in rows
-    #     ]
-    #     return jsonify(events)
-
     @app.route("/get_reports")
     def get_reports():
         g_logger.info(f"{inspect.stack()[0][3]}()")
 
-        with engine.connect() as conn:
+        with sqlite3.connect(k_DB_Path) as conn:
+            cursor = conn.cursor()
+
             # Récupérer tous les rapports
-            result = conn.execute(
-                text("SELECT id, report_name, created_at FROM reports")
-            )
-            rows = result.fetchall()
+            cursor.execute("SELECT id, report_name, created_at FROM reports")
+            rows = cursor.fetchall()
 
         # Formater les rapports pour FullCalendar
         events = [
             {
-                "title": f"Report: {row['report_name']}",
-                "start": row['created_at'].isoformat(),  # Format ISO (YYYY-MM-DDTHH:mm:ss)
-                "url": f"/report/{row['id']}",  # Lien vers le détail du rapport
+                "title": f"Report: {row[1]}",
+                "start": row[2],  # Format ISO (YYYY-MM-DDTHH:mm:ss)
+                "url": f"/report/{row[0]}",  # Lien vers le détail du rapport
             }
             for row in rows
         ]
         return jsonify(events)
 
-
-
     # ----------------------------------------------------------------------
     # Route pour afficher les rapports d'une date spécifique
-    # @app.route("/reports")
-    # def reports_by_date():
-    #     g_logger.info(f"{inspect.stack()[0][3]}()")
-    #     date = request.args.get("date")
-
-    #     with sqlite3.connect(k_DB_Path) as conn:
-    #         cursor = conn.cursor()
-    #         # Rechercher les rapports du jour sélectionné
-    #         cursor.execute(
-    #             """
-    #             SELECT id, report_name, created_at
-    #             FROM reports
-    #             WHERE DATE(created_at) = ?
-    #         """,
-    #             (date,),
-    #         )
-    #         rows = cursor.fetchall()
-
-    #     return render_template("reports.html", reports=rows, date=date)
     @app.route("/reports")
     def reports_by_date():
         g_logger.info(f"{inspect.stack()[0][3]}()")
         date = request.args.get("date")
 
-        with engine.connect() as conn:
+        with sqlite3.connect(k_DB_Path) as conn:
+            cursor = conn.cursor()
             # Rechercher les rapports du jour sélectionné
-            result = conn.execute(
-                text("""
-                    SELECT id, report_name, created_at
-                    FROM reports
-                    WHERE DATE(created_at) = :selected_date
-                """),
-                {"selected_date": date},
+            cursor.execute(
+                """
+                SELECT id, report_name, created_at
+                FROM reports
+                WHERE DATE(created_at) = ?
+            """,
+                (date,),
             )
-            rows = result.fetchall()
+            rows = cursor.fetchall()
 
         return render_template("reports.html", reports=rows, date=date)
 
+
     # ----------------------------------------------------------------------
     # Route pour afficher un rapport spécifique
-    # @app.route("/report/<int:report_id>")
-    # def show_report(report_id):
-    #     g_logger.info(f"{inspect.stack()[0][3]}()")
-
-    #     with sqlite3.connect(k_DB_Path) as conn:
-    #         cursor = conn.cursor()
-
-    #         # Retrieve the report content from the database
-    #         cursor.execute(
-    #             "SELECT report_name, report_content FROM reports WHERE id = ?",
-    #             (report_id,),
-    #         )
-    #         result = cursor.fetchone()
-
-    #     if result is None:
-    #         abort(404, description="Report not found")
-
-    #     report_name, report_content = result
-
-    #     # Serve the HTML content directly
-    #     return report_content, 200, {"Content-Type": "text/html"}
     @app.route("/report/<int:report_id>")
     def show_report(report_id):
         g_logger.info(f"{inspect.stack()[0][3]}()")
 
-        with engine.connect() as conn:
+        with sqlite3.connect(k_DB_Path) as conn:
+            cursor = conn.cursor()
+
             # Retrieve the report content from the database
-            result = conn.execute(
-                text("""
-                    SELECT report_name, report_content
-                    FROM reports
-                    WHERE id = :report_id
-                """),
-                {"report_id": report_id},
-            ).fetchone()
+            cursor.execute(
+                "SELECT report_name, report_content FROM reports WHERE id = ?",
+                (report_id,),
+            )
+            result = cursor.fetchone()
 
         if result is None:
             abort(404, description="Report not found")
 
-        report_name, report_content = result["report_name"], result["report_content"]
+        report_name, report_content = result
 
         # Serve the HTML content directly
         return report_content, 200, {"Content-Type": "text/html"}
 
 
     # ----------------------------------------------------------------------
-    # Route pour sauver le rapport reçu dans la base
-    # On ne sauvegarde plus rien dans ./reports
-
-    # @app.route("/upload", methods=["POST"])
-    # def upload_file():
-    #     g_logger.info(f"{inspect.stack()[0][3]}()")
-
-    #     if "file" not in request.files:
-    #         return jsonify({"error": "No file part in the request"}), 400
-
-    #     file = request.files["file"]
-    #     if file.filename == "":
-    #         return jsonify({"error": "No selected file"}), 400
-
-    #     file_path = os.path.join(k_Reports_Dir, file.filename)
-    #     file.save(file_path)
-    #     g_logger.info(f"Report saved as : {file_path}")
-
-    #     # Save the content to the database
-    #     with sqlite3.connect(k_DB_Path) as conn:
-    #         cursor = conn.cursor()
-
-    #         # Read the HTML content
-    #         with open(file_path, "r", encoding="utf-8") as f:
-    #             content = f.read()
-
-    #         # Insert the report with its content
-    #         cursor.execute(
-    #             """
-    #             INSERT INTO reports (report_name, created_at, report_content)
-    #             VALUES (?, ?, ?)
-    #             """,
-    #             (file.filename, datetime.now(), content),
-    #         )
-    #         g_logger.info(f"Saved report '{file.filename}' to the database.")
-
-    #         conn.commit()
-
-    #     return jsonify({"message": f"File saved to {file_path}"}), 200
+    # Route pour sauver le rapport reçu dans ./reports
 
     @app.route("/upload", methods=["POST"])
     def upload_file():
@@ -427,25 +222,32 @@ def create_app() -> Flask:
         if file.filename == "":
             return jsonify({"error": "No selected file"}), 400
 
-        # Read the content of the uploaded file directly
-        content = file.read().decode("utf-8")  # Decode bytes to string
+        file_path = os.path.join(k_Reports_Dir, file.filename)
+        file.save(file_path)
+        g_logger.info(f"Report saved as : {file_path}")
 
-        # Save the report to the database
-        with engine.connect() as conn:
-            conn.execute(
-                text("""
-                    INSERT INTO reports (report_name, created_at, report_content)
-                    VALUES (:report_name, :created_at, :report_content)
-                """),
-                {
-                    "report_name": file.filename,
-                    "created_at": datetime.now(),
-                    "report_content": content,
-                }
+        # Save the content to the database
+        with sqlite3.connect(k_DB_Path) as conn:
+            cursor = conn.cursor()
+
+            # Read the HTML content
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            # Insert the report with its content
+            cursor.execute(
+                """
+                INSERT INTO reports (report_name, created_at, report_content)
+                VALUES (?, ?, ?)
+                """,
+                (file.filename, datetime.now(), content),
             )
             g_logger.info(f"Saved report '{file.filename}' to the database.")
 
-        return jsonify({"message": f"Report '{file.filename}' saved to database."}), 200
+            conn.commit()
+
+        return jsonify({"message": f"File saved to {file_path}"}), 200
+
     return app
 
 
@@ -473,10 +275,9 @@ if __name__ == "__main__":
     if os.environ.get("WERKZEUG_RUN_MAIN") == None:
         # if os.path.exists(k_DB_Path):
         # os.remove(k_DB_Path)
-        # db_path = Path(k_DB_Path)
-        # if db_path.exists():
-        #     db_path.unlink()
-        pass
+        db_path = Path(k_DB_Path)
+        if db_path.exists():
+            db_path.unlink()
 
     app = create_app()
     g_logger.info("main()")
