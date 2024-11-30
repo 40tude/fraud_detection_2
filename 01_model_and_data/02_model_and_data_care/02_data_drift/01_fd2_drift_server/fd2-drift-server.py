@@ -41,13 +41,14 @@
 # Voir create_app() et app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
 # Procfile
 # web: python -m flask run --host=0.0.0.0 --port=$PORT
-# 
+# Comprendre qu'on va passer par le main ce qui permet à Flask d'utiliser son propre serveur intégré
 
 # PRODUCTION
 # config:set FLASK_DEBUG=False
 # Voir create_app() et app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
 # Procfile
 # web: gunicorn --workers=3 'fd2-drift-server:create_app()'
+# # Comprendre qu'on va utiliser nginx, plus passer par main mais par create_app()
 # 
 # Remplacer app.run(debug=True) par app.run() dans main()
 # Ajouter app.config["DEBUG"] = True dans create_app()
