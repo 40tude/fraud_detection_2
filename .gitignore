@@ -5,6 +5,10 @@ secrets.ps1
 Jenkinsfile
 *.log
 
+# The drift report database
+# It now includes reports content
+reports.db
+
 # too big
 data.xlsx
 fraud_test.csv
