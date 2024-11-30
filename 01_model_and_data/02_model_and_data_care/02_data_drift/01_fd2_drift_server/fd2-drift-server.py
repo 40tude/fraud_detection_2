@@ -187,12 +187,12 @@ def check_table_exist(engine, table_name: str) -> bool:
     g_logger.info(f"Table '{table_name}' exists: {exists}")
     
     # TODO : à virer
-    with engine.connect() as conn:
-        conn.execute(text(f"DROP TABLE IF EXISTS {table_name}"))
-        conn.commit()
-        g_logger.info(f"Table '{k_table_name}' deleted.")
+    # with engine.connect() as conn:
+    #     conn.execute(text(f"DROP TABLE IF EXISTS {table_name}"))
+    #     conn.commit()
+    #     g_logger.info(f"Table '{k_table_name}' deleted.")
+    # exists = inspector.has_table(table_name)
 
-    exists = inspector.has_table(table_name)
     g_logger.info(f"Table '{table_name}' exists: {exists}")
 
     return exists
