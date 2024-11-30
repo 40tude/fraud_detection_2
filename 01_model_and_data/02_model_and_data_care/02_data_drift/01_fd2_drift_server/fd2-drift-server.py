@@ -99,67 +99,6 @@ g_logger.addHandler(stream_handler)
 
 
 
-# ----------------------------------------------------------------------
-# See the report_content field
-# def create_db() -> None:
-#     g_logger.info(f"{inspect.stack()[0][3]}()")
-
-#     # Initialize or connect to the SQLite database
-#     with sqlite3.connect(k_DB_Path) as conn:
-#         cursor = conn.cursor()
-#         # Create the table with the necessary columns
-#         cursor.execute(
-#             f"""
-#             CREATE TABLE {k_table_name} (
-#                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-#                 report_name TEXT NOT NULL,
-#                 created_at TIMESTAMP NOT NULL,
-#                 report_content TEXT
-#             )
-#             """
-#         )
-#         g_logger.info(f"Database and '{k_table_name}' table created successfully.")
-#         conn.commit()
-#     return
-
-
-# ----------------------------------------------------------------------
-# def update_database(report_folder: str = k_Reports_Dir) -> None:
-
-#     g_logger.info(f"{inspect.stack()[0][3]}()")
-
-#     with sqlite3.connect(k_DB_Path) as conn:
-#         cursor = conn.cursor()
-
-#         # List all reports in the folder
-#         report_files = os.listdir(report_folder)
-
-#         # Get already recorded reports from the database
-#         cursor.execute("SELECT report_name FROM reports")
-#         existing_reports = set(row[0] for row in cursor.fetchall())
-
-#         for report in report_files:
-#             if report not in existing_reports:
-#                 # Extract timestamp from the file name or use the file creation time
-#                 report_path = os.path.join(report_folder, report)
-#                 created_at = datetime.fromtimestamp(os.path.getmtime(report_path))
-
-#                 # Read the content of the report file
-#                 with open(report_path, "r", encoding="utf-8") as f:
-#                     content = f.read()
-
-#                 # Insert new report into the database, including its content
-#                 cursor.execute(
-#                     """
-#                     INSERT INTO reports (report_name, created_at, report_content)
-#                     VALUES (?, ?, ?)
-#                     """,
-#                     (report, created_at, content),
-#                 )
-#                 g_logger.info(f"Added report to database: {report}")
-
-#         conn.commit()
-#     return
 
 # ----------------------------------------------------------------------
 def extract_created_at_from_filename(filename: str) -> datetime:
@@ -213,8 +152,6 @@ def update_database(engine, report_folder: str = k_Reports_Dir) -> None:
                 g_logger.info(f"Added report to database: {report}")
                 # os.remove(report_path)
                 # g_logger.info(f"{report_path} is removed")
-
-
 
 # -----------------------------------------------------------------------------
 def check_table_exist(engine, table_name: str) -> bool:
