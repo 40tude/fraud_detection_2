@@ -179,6 +179,16 @@ def check_table_exist(engine, table_name: str) -> bool:
     inspector = sqlalchemy_inspect(engine)
     exists = inspector.has_table(table_name)
     g_logger.info(f"Table '{table_name}' exists: {exists}")
+    
+    # TODO : à virer
+    with engine.connect() as conn:
+        conn.execute(text(f"DROP TABLE IF EXISTS {table_name}"))
+        conn.commit()
+        g_logger.info(f"Table '{k_table_name}' deleted.")
+
+    exists = inspector.has_table(table_name)
+    g_logger.info(f"Table '{table_name}' exists: {exists}")
+
     return exists
 
 # -----------------------------------------------------------------------------
@@ -187,9 +197,6 @@ def create_table(engine) -> None:
     g_logger.info(f"{inspect.stack()[0][3]}() - Creating table '{k_table_name}'")
     try:
         with engine.connect() as conn:
-            # TODO : à virer
-            conn.execute(text(f"DROP TABLE IF EXISTS {k_table_name}"))
-            g_logger.info(f"Table '{k_table_name}' deleted.")
 
             conn.execute(text(k_SQL_Create_Table))
             g_logger.info(f"Table '{k_table_name}' re-created successfully.")
