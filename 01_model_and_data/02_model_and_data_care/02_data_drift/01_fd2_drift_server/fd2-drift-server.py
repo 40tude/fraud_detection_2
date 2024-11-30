@@ -44,7 +44,7 @@ import inspect
 from pathlib import Path
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import create_engine, text, Engine
+from sqlalchemy import create_engine, text, inspect as sqlalchemy_inspect, Engine
 from flask import Flask, jsonify, request, render_template, abort      #, send_from_directory
 
 # ----------------------------------------------------------------------
@@ -237,7 +237,7 @@ def update_database(engine, report_folder: str = k_Reports_Dir) -> None:
 # -----------------------------------------------------------------------------
 def check_table_exist(engine, table_name: str) -> bool:
 
-    inspector = inspect(engine)
+    inspector = sqlalchemy_inspect(engine)
     return inspector.has_table(table_name)
 
 # -----------------------------------------------------------------------------
