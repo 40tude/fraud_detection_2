@@ -13,6 +13,7 @@
 
 # ----------------------------------------------------------------------
 import os
+import re
 import logging
 import sqlite3
 import inspect
@@ -58,6 +59,26 @@ def create_db() -> None:
         conn.commit()
     return
 
+def extract_created_at_from_filename(filename: str) -> datetime:
+    """
+    Extracts the creation timestamp from a filename in the format: 'data_drift_report_YYYYMMJJ_HHMMSS.html'.
+
+    Args:
+        filename (str): The name of the file.
+
+    Returns:
+        datetime: A datetime object corresponding to the extracted timestamp.
+
+    Raises:
+        ValueError: If the filename does not contain a valid timestamp.
+    """
+    match = re.search(r"_(\d{8}_\d{6})\.html$", filename)
+    if not match:
+        raise ValueError(f"Filename '{filename}' does not match the expected format.")
+
+    timestamp_str = match.group(1)  # Extract the YYYYMMJJ_HHMMSS part
+    return datetime.strptime(timestamp_str, "%Y%m%d_%H%M%S")
+
 
 # ----------------------------------------------------------------------
 def update_database(report_folder: str = k_Reports_Dir) -> None:
@@ -74,26 +95,49 @@ def update_database(report_folder: str = k_Reports_Dir) -> None:
         cursor.execute("SELECT report_name FROM reports")
         existing_reports = set(row[0] for row in cursor.fetchall())
 
+        # for report in report_files:
+        #     if report not in existing_reports:
+        #         # Extract timestamp from the file name or use the file creation time
+        #         report_path = os.path.join(report_folder, report)
+        #         created_at = datetime.fromtimestamp(os.path.getmtime(report_path))
+
+        #         # Read the content of the report file
+        #         with open(report_path, "r", encoding="utf-8") as f:
+        #             content = f.read()
+
+        #         # Insert new report into the database, including its content
+        #         cursor.execute(
+        #             """
+        #             INSERT INTO reports (report_name, created_at, report_content)
+        #             VALUES (?, ?, ?)
+        #             """,
+        #             (report, created_at, content),
+        #         )
+        #         g_logger.info(f"Added report to database: {report}")
+
         for report in report_files:
             if report not in existing_reports:
-                # Extract timestamp from the file name or use the file creation time
-                report_path = os.path.join(report_folder, report)
-                created_at = datetime.fromtimestamp(os.path.getmtime(report_path))
+                # Extract created_at from the filename
+                try:
+                    created_at = extract_created_at_from_filename(report)
+                except ValueError as e:
+                    g_logger.warning(f"Skipping file '{report}': {e}")
+                    continue # this file is skipped
 
-                # Read the content of the report file
+                # Read the report content
+                report_path = os.path.join(report_folder, report)
                 with open(report_path, "r", encoding="utf-8") as f:
                     content = f.read()
 
-                # Insert new report into the database, including its content
-                cursor.execute(
+                # Insert the report into the database
+                conn.execute(
                     """
-                    INSERT INTO reports (report_name, created_at, report_content)
-                    VALUES (?, ?, ?)
+                        INSERT INTO reports (report_name, created_at, report_content)
+                        VALUES (:report_name, :created_at, :report_content)
                     """,
                     (report, created_at, content),
                 )
                 g_logger.info(f"Added report to database: {report}")
-
         conn.commit()
     return
 
