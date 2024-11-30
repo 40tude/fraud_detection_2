@@ -24,16 +24,32 @@ from flask import Flask, jsonify, request, render_template, abort      #, send_f
 # ----------------------------------------------------------------------
 k_DB_Path = "./reports.db"
 k_Reports_Dir = "./reports"
+k_table_name = "reports"
+
 
 # ----------------------------------------------------------------------
 # Global logger
-logging.basicConfig(level=logging.INFO)
-# logging.basicConfig(
-#     level=logging.INFO,
-#     format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
-#     datefmt='%Y-%m-%d %H:%M:%S'
-# )
+# logging.basicConfig(level=logging.INFO)
+# # logging.basicConfig(
+# #     level=logging.INFO,
+# #     format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+# #     datefmt='%Y-%m-%d %H:%M:%S'
+# # )
+# g_logger = logging.getLogger("fraud_detection_2_drift_server")
+
+# Global logger
 g_logger = logging.getLogger("fraud_detection_2_drift_server")
+g_logger.setLevel(logging.INFO)
+
+# Create a StreamHandler for Heroku logs
+stream_handler = logging.StreamHandler(sys.stdout)
+stream_handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+stream_handler.setFormatter(formatter)
+
+# Add the handler to your logger
+g_logger.addHandler(stream_handler)
+g_logger.info("=== NEW SESSION START ===")
 
 
 # ----------------------------------------------------------------------
@@ -47,7 +63,7 @@ def create_db() -> None:
         # Create the table with the necessary columns
         cursor.execute(
             """
-            CREATE TABLE reports (
+            CREATE TABLE {k_table_name}  (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 report_name TEXT NOT NULL,
                 created_at TIMESTAMP NOT NULL,
@@ -61,18 +77,8 @@ def create_db() -> None:
 
 # ----------------------------------------------------------------------
 def extract_created_at_from_filename(filename: str) -> datetime:
-    """
-    Extracts the creation timestamp from a filename in the format: 'data_drift_report_YYYYMMJJ_HHMMSS.html'.
-
-    Args:
-        filename (str): The name of the file.
-
-    Returns:
-        datetime: A datetime object corresponding to the extracted timestamp.
-
-    Raises:
-        ValueError: If the filename does not contain a valid timestamp.
-    """
+    g_logger.info(f"{inspect.stack()[0][3]}()")
+    
     match = re.search(r"_(\d{8}_\d{6})\.html$", filename)
     if not match:
         raise ValueError(f"Filename '{filename}' does not match the expected format.")
@@ -86,35 +92,15 @@ def update_database(report_folder: str = k_Reports_Dir) -> None:
 
     g_logger.info(f"{inspect.stack()[0][3]}()")
 
+    # List all reports in the folder
+    report_files = os.listdir(report_folder)
+
     with sqlite3.connect(k_DB_Path) as conn:
         cursor = conn.cursor()
 
-        # List all reports in the folder
-        report_files = os.listdir(report_folder)
-
         # Get already recorded reports from the database
-        cursor.execute("SELECT report_name FROM reports")
+        cursor.execute(f"SELECT report_name FROM {k_table_name}")
         existing_reports = set(row[0] for row in cursor.fetchall())
-
-        # for report in report_files:
-        #     if report not in existing_reports:
-        #         # Extract timestamp from the file name or use the file creation time
-        #         report_path = os.path.join(report_folder, report)
-        #         created_at = datetime.fromtimestamp(os.path.getmtime(report_path))
-
-        #         # Read the content of the report file
-        #         with open(report_path, "r", encoding="utf-8") as f:
-        #             content = f.read()
-
-        #         # Insert new report into the database, including its content
-        #         cursor.execute(
-        #             """
-        #             INSERT INTO reports (report_name, created_at, report_content)
-        #             VALUES (?, ?, ?)
-        #             """,
-        #             (report, created_at, content),
-        #         )
-        #         g_logger.info(f"Added report to database: {report}")
 
         for report in report_files:
             if report not in existing_reports:
@@ -129,24 +115,29 @@ def update_database(report_folder: str = k_Reports_Dir) -> None:
                 report_path = os.path.join(report_folder, report)
                 with open(report_path, "r", encoding="utf-8") as f:
                     content = f.read()
+                    g_logger.info(f"Content of {report}: {content[:100]}...")  # Log only the first 100 chars
+
+                # if not content.strip():
+                #     g_logger.warning(f"File {report} is empty or could not be read correctly!")
+                #     continue  # Skip this file
+
 
                 # Insert the report into the database
                 conn.execute(
-                    """
-                        INSERT INTO reports (report_name, created_at, report_content)
+                    f"""
+                        INSERT INTO {k_table_name} (report_name, created_at, report_content)
                         VALUES (:report_name, :created_at, :report_content)
                     """,
                     (report, created_at, content),
                 )
+                conn.commit() # Ajout explicite du commit
                 g_logger.info(f"Added report to database: {report}")
-        conn.commit()
     return
 
 
 # ----------------------------------------------------------------------
 # SQLite database setup
 def init_db() -> None:
-    """Initialize the SQLite database, creating it if it doesn't exist."""
 
     g_logger.info(f"{inspect.stack()[0][3]}()")
 
