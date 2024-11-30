@@ -65,13 +65,27 @@ CREATE TABLE {k_table_name} (
 
 # ----------------------------------------------------------------------
 # Global logger
-logging.basicConfig(level=logging.INFO)
-# logging.basicConfig(
-#     level=logging.INFO,
-#     format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
-#     datefmt='%Y-%m-%d %H:%M:%S'
-# )
+# logging.basicConfig(level=logging.INFO)
+# # logging.basicConfig(
+# #     level=logging.INFO,
+# #     format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+# #     datefmt='%Y-%m-%d %H:%M:%S'
+# # )
+# g_logger = logging.getLogger("fraud_detection_2_drift_server")
+
+# Global logger
 g_logger = logging.getLogger("fraud_detection_2_drift_server")
+g_logger.setLevel(logging.INFO)
+
+# Create a StreamHandler for Heroku logs
+stream_handler = logging.StreamHandler(sys.stdout)
+stream_handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+stream_handler.setFormatter(formatter)
+
+# Add the handler to your logger
+g_logger.addHandler(stream_handler)
+
 
 
 # ----------------------------------------------------------------------
