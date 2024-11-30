@@ -168,6 +168,7 @@ def update_database(engine, report_folder: str = k_Reports_Dir) -> None:
                     """),
                     {"report_name": report, "created_at": created_at, "report_content": content},
                 )
+                conn.commit()  # Ajout explicite du commit
                 g_logger.info(f"Added report to database: {report}")
                 # os.remove(report_path)
                 # g_logger.info(f"{report_path} is removed")
@@ -392,11 +393,11 @@ if __name__ == "__main__":
         # db_path = Path(k_DB_Path)
         # if db_path.exists():
         #     db_path.unlink()
-        pass
+        app = create_app()
+        g_logger.info("main()")
+        # app.run(debug=True) inutile voir create_app() et app.config["DEBUG"] = ...
+        app.run()
 
-    app = create_app()
-    g_logger.info("main()")
-    # app.run(debug=True) inutile voir create_app() et app.config["DEBUG"] = ...
-    app.run()
 
+    
     
