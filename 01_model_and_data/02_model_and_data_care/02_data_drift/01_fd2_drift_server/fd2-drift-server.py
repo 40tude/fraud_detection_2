@@ -44,7 +44,7 @@ import inspect
 from pathlib import Path
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import create_engine, inspect, text, Engine
+from sqlalchemy import create_engine, text, Engine
 from flask import Flask, jsonify, request, render_template, abort      #, send_from_directory
 
 # ----------------------------------------------------------------------
