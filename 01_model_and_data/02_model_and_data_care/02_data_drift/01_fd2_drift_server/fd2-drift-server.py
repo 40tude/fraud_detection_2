@@ -37,22 +37,28 @@
 # Faire la difference en DEBUG et PRODUCTION
 
 # DEBUG 
-# config:set FLASK_DEBUG=True (heroku ps:restart si besoin)
+# heroku config:set FLASK_DEBUG=False --app fd2-drift-server (heroku ps:restart si besoin)
 # Voir create_app() et app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
 # Procfile
 # web: python -m flask --app fd2-drift-server run --host=0.0.0.0 --port=$PORT
 # Comprendre qu'on va passer par le main ce qui permet à Flask d'utiliser son propre serveur intégré
 
 # PRODUCTION
-# config:set FLASK_DEBUG=False
-# Voir create_app() et app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
 # Procfile
 # web: gunicorn --workers=3 'fd2-drift-server:create_app()'
 # # Comprendre qu'on va utiliser nginx, plus passer par main mais par create_app()
+# Voir create_app() et app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
+#
+# heroku config:set FLASK_DEBUG=False --app fd2-drift-server
 # 
 # Remplacer app.run(debug=True) par app.run() dans main()
 # Ajouter app.config["DEBUG"] = True dans create_app()
 # Faudra l'enlever en mode "production" 
+
+# Faire démarrer les dynos en CLI = heroku ps:restart --app fd2-drift-server # Redemarre certains dyno. Tous par defaut. heroku ps:restart web --app <app_name>
+# Open App en CLI                 = heroku open --app fd2-drift-server
+
+# heroku restart --app fd2-drift-server # Redémarrage global de toute l'application.
 #   
 # ----------------------------------------------------------------------
 import os
