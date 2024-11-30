@@ -272,9 +272,8 @@ def create_app() -> Flask:
             # Récupérer tous les rapports
             result = conn.execute(
                 text("SELECT id, report_name, created_at FROM reports")
-            )
-            # rows = result.fetchall()
-            rows = [dict(row) for row in result]  # Convert to dicts
+            ).mappings()
+            rows = [row for row in result]  # Convert to dicts
 
         # Formater les rapports pour FullCalendar
         events = [
@@ -331,7 +330,7 @@ def create_app() -> Flask:
             abort(404, description="Report not found")
 
         report_name, report_content = result["report_name"], result["report_content"]
-
+        g_logger.info(f"Report {report_name} content length = {len(report_content)}")
         # Serve the HTML content directly
         return report_content, 200, {"Content-Type": "text/html"}
 
