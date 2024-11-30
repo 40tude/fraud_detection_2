@@ -272,7 +272,7 @@ def create_app() -> Flask:
             # Récupérer tous les rapports
             result = conn.execute(
                 text("SELECT id, report_name, created_at FROM reports")
-            ).execution_options(stream_results=True)
+            )
             # rows = result.fetchall()
             rows = [dict(row) for row in result]  # Convert to dicts
 
