@@ -1,5 +1,9 @@
 # fd2-drift-server.py
 
+# git subtree push --prefix 01_model_and_data/02_model_and_data_care/02_data_drift/01_fd2_drift_server heroku main
+# heroku ps:restart --app fd2-drift-server
+# heroku logs --tail
+
 # DEBUG -----------------------------------------------------------------------
 # Procfile:
 # web: python -m flask --app fd2-drift-server run --host=0.0.0.0 --port=$PORT
