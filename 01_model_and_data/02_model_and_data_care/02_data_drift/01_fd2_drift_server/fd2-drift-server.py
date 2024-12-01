@@ -43,7 +43,7 @@
 # web: python -m flask --app fd2-drift-server run --host=0.0.0.0 --port=$PORT
 # Comprendre qu'on va passer par le main ce qui permet à Flask d'utiliser son propre serveur intégré
 #
-# heroku config:set FLASK_DEBUG=False --app fd2-drift-server (heroku ps:restart si besoin)
+# heroku config:set FLASK_DEBUG=True --app fd2-drift-server (heroku ps:restart si besoin)
 #
 # Voir create_app() et app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
 
@@ -61,12 +61,14 @@
 # Ajouter app.config["DEBUG"] = True dans create_app()
 # Faudra l'enlever en mode "production" 
 
-# Faire démarrer les dynos en CLI = heroku ps:restart --app fd2-drift-server # Redemarre certains dyno. Tous par defaut. heroku ps:restart web --app <app_name>
-# Open App en CLI                 = heroku open --app fd2-drift-server
 
-# heroku restart --app fd2-drift-server # Redémarrage global de toute l'application.
-#   
+
+
 # ----------------------------------------------------------------------
+#   
+# Faire démarrer les dynos en CLI           = heroku ps:restart --app fd2-drift-server # Redemarre certains dyno. Tous par defaut. heroku ps:restart web --app <app_name>
+# Redémarrage global de toute l'application = heroku restart --app fd2-drift-server # 
+# Open App en CLI                           = heroku open --app fd2-drift-server
 
 
 import os
@@ -432,7 +434,6 @@ if __name__ == "__main__":
     # That is, when WERKZEUG_RUN_MAIN is still “”.
 
     os.chdir(Path(__file__).parent)
-    g_logger.info(f"Répertoire courant : {Path.cwd()}")
 
     if os.environ.get("WERKZEUG_RUN_MAIN") == None:
         # if os.path.exists(k_DB_Path):
@@ -441,7 +442,9 @@ if __name__ == "__main__":
         # if db_path.exists():
         #     db_path.unlink()
         app = create_app()
-        g_logger.info("main()")
+        # g_logger.info("main()")
+        g_logger.debug(f"{inspect.stack()[0][3]}()")
+        g_logger.debug(f"Répertoire courant : {Path.cwd()}")
         # app.run(debug=True) inutile voir create_app() et app.config["DEBUG"] = ...
         app.run()
 
