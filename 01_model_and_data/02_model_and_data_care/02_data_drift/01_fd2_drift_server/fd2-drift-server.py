@@ -264,8 +264,6 @@ def init_db() -> Engine:
 # create_app() function is the entry point which configure the Flask app before it runs
 # double check the content of Procfile file
 def create_app() -> Flask:
-
-
     
     app = Flask(__name__)
 
@@ -275,27 +273,18 @@ def create_app() -> Flask:
     # En local avec Flask uniquement : app.run(debug=True) serait suffisant pour activer le mode debug pendant les tests. 
     # Mais bon ici le code fonctionne en local ET sur Heroku
     # FLASK_DEBUG est à definir sur Heroku ou avec heroku config:set FLASK_DEBUG=True
-    # En local faut utiliser secrtes.ps1
+    # En local faut utiliser secrets.ps1
     
     app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False").strip().lower() in ("true", "1")
-    # app.config["DEBUG"] = True
     
     set_up_logger(app, app.config["DEBUG"])
-    # set_up_logger(app, True)
     
     g_logger.debug(f"{inspect.stack()[0][3]}()")
-    
-    g_logger.debug(f"FLASK_DEBUG via os.environ.get = {os.environ.get("FLASK_DEBUG")}")
-    g_logger.debug(f"Type  of app.config['DEBUG']: {type(app.config['DEBUG'])}")
-    g_logger.debug(f"Value of app.config['DEBUG']: {app.config['DEBUG']}")
-    
-
 
     # If you run the app locally you must run ./secrets.ps1 first 
     # In production on Heroku DRIFT_SERVER_SECRET_KEY must have been set manually (see readme.md)
     # Without session key, Flask does not allow the app to set or access the session dictionary
     app.secret_key = os.environ.get("DRIFT_SERVER_SECRET_KEY")
-
 
     with app.app_context():
         engine = init_db()  # Initialise la base de données quand l'application est créée
@@ -421,31 +410,17 @@ def create_app() -> Flask:
 # ----------------------------------------------------------------------
 if __name__ == "__main__":
 
-    # DONE : it seems that locally, in debug mode the application starts twice...
-    # Uncomment the print() below to see what happen
-    # print(f"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-
-    # In debug mode, Flask uses an automatic reloader called Werkzeug.
-    # This reloader automatically restarts the application whenever it detects a change in the source code.
-    # This way, modifications are taken into account without having to restart the application manually.
-    # This reloader creates two processes:
-    #   - The first process starts the Flask server, then launches the reloader.
-    #   - The reloader then restarts the application in a second process to enable hot reloading of the code.
-    # This double startup results in the double display of print(f “XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX”)
-
-    # In debug mode, we want to delete the database the very first time
-    # That is, when WERKZEUG_RUN_MAIN is still “”.
-
     os.chdir(Path(__file__).parent)
-
-    if os.environ.get("WERKZEUG_RUN_MAIN") == None:
-        # if os.path.exists(k_DB_Path):
-        # os.remove(k_DB_Path)
-        # db_path = Path(k_DB_Path)
-        # if db_path.exists():
-        #     db_path.unlink()
+    
+    # En mode debug, Flask utilise un reloader (Werkzeug) qui redémarre l'application pour détecter les modifications dans le code source. 
+    # Ce redémarrage entraîne deux initialisations :
+    #       Le premier processus démarre Flask et initialise l'application.
+    #       Le reloader démarre une nouvelle instance du processus pour activer le rechargement à chaud.
+    # Solution pour éviter les doublons :
+    #       Ajouter une condition pour vérifier si l'application est démarrée par le reloader ou directement par Flask
+    if os.environ.get("WERKZEUG_RUN_MAIN") == True:
+        # Ce bloc est exécuté uniquement par le processus reloader
         app = create_app()
-        # g_logger.info("main()")
         g_logger.debug(f"{inspect.stack()[0][3]}()")
         g_logger.debug(f"Répertoire courant : {Path.cwd()}")
         # app.run(debug=True) inutile voir create_app() et app.config["DEBUG"] = ...
