@@ -265,6 +265,9 @@ def init_db() -> Engine:
 # double check the content of Procfile file
 def create_app() -> Flask:
 
+
+    g_logger.debug(f"FLASK_DEBUG = {os.environ.get("FLASK_DEBUG")}")
+    
     app = Flask(__name__)
 
 
