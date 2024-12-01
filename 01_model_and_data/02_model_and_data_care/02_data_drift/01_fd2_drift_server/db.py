@@ -1,33 +1,38 @@
-# db.py
-
 from sqlalchemy import create_engine, text
+from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
+from config import Config
 import logging
 
 g_logger = logging.getLogger("fraud_detection_2_drift_server")
 
+# Create the SQLAlchemy engine
+engine = create_engine(Config.SQLALCHEMY_DATABASE_URI, pool_pre_ping=True)
+
+# ScopedSession ensures thread-safe database sessions
+db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
+
 def init_db():
     """
-    Initializes the PostgreSQL database by checking or creating necessary tables.
+    Initializes the database by checking or creating the necessary tables.
     """
-    engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
     try:
+        # Check table existence
         with engine.connect() as conn:
-            # Check table existence
-            table_check = text("SELECT 1 FROM information_schema.tables WHERE table_name='reports'")
-            result = conn.execute(table_check).fetchone()
-
+            result = conn.execute(
+                text("SELECT 1 FROM information_schema.tables WHERE table_name='reports'")
+            ).fetchone()
             if not result:
-                create_table(engine)
+                create_table()
                 g_logger.info("Reports table created successfully.")
     except SQLAlchemyError as e:
         g_logger.error(f"Error initializing database: {e}")
         raise
 
 
-def create_table(engine):
+def create_table():
     """
-    Creates the `reports` table in the PostgreSQL database.
+    Creates the `reports` table in the database.
     """
     create_table_query = """
     CREATE TABLE reports (
@@ -37,5 +42,26 @@ def create_table(engine):
         report_content TEXT
     );
     """
-    with engine.begin() as conn:
-        conn.execute(text(create_table_query))
+    try:
+        with engine.begin() as conn:
+            conn.execute(text(create_table_query))
+            g_logger.info("Reports table created successfully.")
+    except SQLAlchemyError as e:
+        g_logger.error(f"Error creating table: {e}")
+        raise
+
+
+def get_session():
+    """
+    Provides the current scoped session.
+    Use this function to get a database session in your routes or logic.
+    """
+    return db_session
+
+
+def shutdown_session(exception=None):
+    """
+    Removes the session at the end of the request to avoid leaks.
+    This should be registered with Flask's teardown_appcontext.
+    """
+    db_session.remove()
