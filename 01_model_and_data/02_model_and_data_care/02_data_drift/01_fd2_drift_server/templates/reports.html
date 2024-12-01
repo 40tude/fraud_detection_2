@@ -11,7 +11,8 @@
     <ul>
         {% for report in reports %}
         <li>
-            <a href="/report/{{ report[0] }}">{{ report[1] }} ({{ report[2] }})</a>
+            <!-- <a href="/report/{{ report[0] }}">{{ report[1] }} ({{ report[2] }})</a> -->
+            <a href="/report/{{ report.id }}">{{ report.name }} ({{ report.created_at }})</a>
         </li>
         {% endfor %}
     </ul>
