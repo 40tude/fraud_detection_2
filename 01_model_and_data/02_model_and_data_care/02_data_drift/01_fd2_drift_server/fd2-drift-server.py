@@ -21,7 +21,11 @@
 #
 
 
+
 # Refactor de fd2-drift-server.py
+# Split in 5 differents files
+
+
 
 # Passage à dotenv
 #   l'installer : conda install python-dotenv -c conda-forge -y 
@@ -44,6 +48,13 @@
 #   Modifier db.py et ajouter update_database() avec gestion des exceptions pour les fichiers
 #   et appeler update_database()
 
+# Ajout de la feuille rapport d'un jour particulier
+#   Ajouterla route @app.route("/reports") dans route.py
+#   Modfifier templates/reports.html
+
+
+
+# ----------------------------------------------------------------------
 from flask import Flask, jsonify
 from sqlalchemy.exc import SQLAlchemyError
 from config import Config
@@ -54,9 +65,10 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-# Entry point of the application
-# Original comments about local and Heroku configurations are retained.
 
+
+# ----------------------------------------------------------------------
+# Entry point of the application
 def create_app() -> Flask:
     """
     Create and configure the Flask application.
@@ -67,7 +79,6 @@ def create_app() -> Flask:
     env_path = Path(".env")
 
     # The app use env variables under Heroku and .env content under Windows 11  
-    # Should be done iff it runs on Windows 11
     is_heroku = os.getenv("DYNO") is not None  # Heroku sets the DYNO environment variable
     if not is_heroku and not env_path.is_file():
         raise FileNotFoundError(".env file is missing. Create one at the root of the project.")
@@ -102,7 +113,7 @@ def create_app() -> Flask:
 
 
 
-
+# ----------------------------------------------------------------------
 def register_error_handlers(app: Flask):
     """
     Registers global error handlers for the Flask application.
@@ -133,6 +144,7 @@ def register_error_handlers(app: Flask):
 
 
 
+# ----------------------------------------------------------------------
 if __name__ == "__main__":
     # Application start for local development
     app = create_app()
