@@ -36,6 +36,10 @@
 # Faut pousser direct sur Heroku
 # Faire la difference en DEBUG et PRODUCTION
 
+# Remplacer app.run(debug=True) par app.run() dans main()
+# Ajouter app.config["DEBUG"] = True dans create_app()
+# Faudra l'enlever en mode "production" 
+
 
 
 # DEBUG ----------------------------------------------------------------------- 
@@ -57,9 +61,6 @@
 #
 # heroku config:set FLASK_DEBUG=False --app fd2-drift-server
 # 
-# Remplacer app.run(debug=True) par app.run() dans main()
-# Ajouter app.config["DEBUG"] = True dans create_app()
-# Faudra l'enlever en mode "production" 
 
 
 
