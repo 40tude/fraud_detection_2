@@ -78,11 +78,11 @@ def update_database(report_folder: str = "./reports"):
                     g_logger.info(f"Added report to database: {report}")
 
                     # Optionally delete the file
-                    try:
-                        os.remove(report_path)
-                        g_logger.info(f"Deleted file: {report_path}")
-                    except OSError as e:
-                        g_logger.error(f"Failed to delete file '{report_path}': {e}")
+                    # try:
+                    #     os.remove(report_path)
+                    #     g_logger.info(f"Deleted file: {report_path}")
+                    # except OSError as e:
+                    #     g_logger.error(f"Failed to delete file '{report_path}': {e}")
     except SQLAlchemyError as e:
         g_logger.error(f"Database error during update_database: {e}")
         raise

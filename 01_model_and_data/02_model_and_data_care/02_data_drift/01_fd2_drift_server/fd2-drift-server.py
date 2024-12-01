@@ -1,6 +1,27 @@
 # fd2-drift-server.py
 
-# Split de fd2-drift-server.py
+# DEBUG -----------------------------------------------------------------------
+# Procfile:
+# web: python -m flask --app fd2-drift-server run --host=0.0.0.0 --port=$PORT
+# Note: This uses Flask's built-in server through the main module
+#
+# Enable debugging on Heroku:
+# heroku config:set FLASK_DEBUG=True --app fd2-drift-server (restart with heroku ps:restart if needed)
+#
+# Refer to create_app() and app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
+
+# PRODUCTION ------------------------------------------------------------------
+# Procfile:
+# web: gunicorn --workers=3 'fd2-drift-server:create_app()'
+# Note: This setup uses nginx, bypasses the main module, and directly calls create_app()
+# See create_app() et app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
+#
+# Disable debugging on Heroku:
+# heroku config:set FLASK_DEBUG=False --app fd2-drift-server
+#
+
+
+# Refactor de fd2-drift-server.py
 
 # Passage à dotenv
 #   l'installer : conda install python-dotenv -c conda-forge -y 
