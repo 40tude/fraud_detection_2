@@ -46,7 +46,9 @@ def update_database(report_folder: str = "./reports"):
 
         # Fetch existing reports from the database
         with session.begin():
-            result = session.execute(text("SELECT report_name FROM reports"))
+            # SQLAlchemy's .mappings() method converts each line of the result into a dictionary. 
+            # This approach is compatible with an SQLAlchemy session.
+            result = session.execute(text("SELECT report_name FROM reports")).mappings()
             existing_reports = {row["report_name"] for row in result}
 
             for report in report_files:
