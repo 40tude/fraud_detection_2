@@ -266,7 +266,6 @@ def init_db() -> Engine:
 def create_app() -> Flask:
 
 
-    g_logger.debug(f"FLASK_DEBUG = {os.environ.get("FLASK_DEBUG")}")
     
     app = Flask(__name__)
 
@@ -287,7 +286,9 @@ def create_app() -> Flask:
     set_up_logger(app, True)
     
     g_logger.debug(f"{inspect.stack()[0][3]}()")
-
+    
+    g_logger.debug(f"FLASK_DEBUG via os.environ.get = {os.environ.get("FLASK_DEBUG")}")
+    
     # If you run the app locally you must run ./secrets.ps1 first 
     # In production on Heroku DRIFT_SERVER_SECRET_KEY must have been set manually (see readme.md)
     # Without session key, Flask does not allow the app to set or access the session dictionary
