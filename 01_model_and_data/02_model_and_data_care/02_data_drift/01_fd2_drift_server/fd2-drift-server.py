@@ -109,7 +109,7 @@ CREATE TABLE {k_table_name} (
 # Global logger - Default minimal configuration
 # DEBUG INFO WARNING ERROR CRITICAL
 g_logger = logging.getLogger("fraud_detection_2_drift_server")
-g_logger.setLevel(logging.WARNING)  # Minimal level to prevent unwanted logs
+g_logger.setLevel(logging.INFO)  # WARNING Minimal level to prevent unwanted logs
 if not g_logger.hasHandlers():
     g_logger.addHandler(logging.NullHandler())  # Prevent errors before setup
 
