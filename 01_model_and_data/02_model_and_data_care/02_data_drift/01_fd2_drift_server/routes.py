@@ -1,10 +1,11 @@
 # routes.py
 
-from flask import jsonify, render_template, request, abort
+from flask import jsonify, render_template, request, abort, jsonify
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import text
 from db import get_session
 import logging
+from datetime import datetime
 
 g_logger = logging.getLogger("fraud_detection_2_drift_server")
 
@@ -96,3 +97,55 @@ def register_routes(app):
 
         # Render the template with the reports
         return render_template("reports.html", reports=rows, date=date)
+    
+
+
+    @app.route("/upload", methods=["POST"])
+    def upload_file():
+        g_logger.debug("Entering /upload")
+
+        # Check if the request contains a file part
+        if "file" not in request.files:
+            g_logger.warning("No file part in the request")
+            return jsonify({"error": "No file part in the request"}), 400
+
+        file = request.files["file"]
+
+        # Check if a file is selected
+        if not file.filename:
+            g_logger.warning("No file selected in the request")
+            return jsonify({"error": "No selected file"}), 400
+
+        try:
+            # Read the content of the uploaded file
+            content = file.read().decode("utf-8")  # Decode bytes to string
+
+            # Save the report into the database
+            session = get_session()
+            with session.begin():
+                session.execute(
+                    text("""
+                        INSERT INTO reports (report_name, created_at, report_content)
+                        VALUES (:report_name, :created_at, :report_content)
+                    """),
+                    {
+                        "report_name": file.filename,
+                        "created_at": datetime.now(),
+                        "report_content": content,
+                    },
+                )
+                g_logger.info(f"Saved report '{file.filename}' to the database.")
+        
+        except UnicodeDecodeError as e:
+            g_logger.error(f"Failed to decode file '{file.filename}': {e}")
+            return jsonify({"error": "Failed to decode the file content"}), 400
+        
+        except SQLAlchemyError as e:
+            g_logger.error(f"Database error while saving report '{file.filename}': {e}")
+            return jsonify({"error": "Database error occurred"}), 500
+        
+        except Exception as e:
+            g_logger.error(f"Unexpected error while uploading file '{file.filename}': {e}")
+            return jsonify({"error": "An unexpected error occurred"}), 500
+
+        return jsonify({"message": f"Report '{file.filename}' saved to database."}), 200
