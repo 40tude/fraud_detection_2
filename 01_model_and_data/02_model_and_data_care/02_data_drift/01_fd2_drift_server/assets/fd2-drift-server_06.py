@@ -1,101 +1,80 @@
-# On Windows 11
-#   Activate the environment: conda activate fd2_drift_server_no_docker
-#   Browse to: http://localhost:5000/report
+# On WIN11
+#   conda activate fd2_drift_server_no_docker
+#   Browse to : http://localhost:5000/report
 
-# In this version, save the report directly in the SQLite database for persistency, but...
-# It doesn't work on Heroku (works perfectly on a Windows 11 host)
-# Reminder: On Heroku, there is no way to save files locally
-# Possible solutions:
+# In this version, save the report directly in the SQLite database to get persistency but...
+# It does'nt work on Heroku (works like a charm on WIN11 host)
+# Again : on Heroku there is no way to save locally
+# We can :
 #   1. Save on AWS S3
-#   2. Use PostgreSQL <-- This is the approach used here
+#   2. Use PostgreSQL <-- This is what we do here  
 
-# Add a PostgreSQL database to the fd2_drift_server on Heroku
-# Add a Config Var named          DRIFT_SERVER_SQL_URI = postgresql://u76st...
-# In secrets.ps1, add the following line: $env:DRIFT_SERVER_SQL_URI = "postgresql://u76st..."
 
-# Install the required dependencies using PowerShell:
-# ```powershell
-# conda install psycopg2-binary sqlalchemy -c conda-forge -y
-# conda install sqlalchemy -c conda-forge -y
-# ```
+# Add a Postgresql to the fd2_drift_server on Heroku
+# Add a Config Var named DRIFT_SERVER_SQL_URI with postgresql://u76st...
+# In secrets.ps1 add a line $env:DRIFT_SERVER_SQL_URI = "postgresql://u76st...
 
-# Update the requirements.txt file by adding:
+#```powershell
+#conda install psycopg2-binary sqlalchemy -c conda-forge -y
+#conda install sqlalchemy -c conda-forge -y
+#```
+
+# In requirements.txt, add  
 # psycopg2-binary
 # sqlalchemy
-# Run: pip list --format=freeze > requirements.txt
+# pip list --format=freeze > requirements.txt
 # Add gunicorn==23.0.0 at the very end
 
-# Example requirements.txt content:
-# blinker==1.9.0
-# click==8.1.7
-# colorama==0.4.6
-# Flask==3.1.0
-# importlib_metadata==8.5.0
-# itsdangerous==2.2.0
-# Jinja2==3.1.4
-# MarkupSafe==3.0.2
-# pip==24.2
-# setuptools==75.1.0
-# Werkzeug==3.1.3
-# wheel==0.44.0
-# zipp==3.21.0
-# greenlet==3.1.1
-# typing_extensions==4.12.2
-# psycopg2-binary==2.9.9
-# SQLAlchemy==2.0.36
-# gunicorn==23.0.0
+# delete reports.db
 
-# Delete the SQLite database file `reports.db`
+# Comment the # import sqlite3
 
-# Comment out the line importing sqlite3 (# import sqlite3)
+# Push du projet fraud_detection_2 sur GitHub
+# DEPUIS LA RACINE du projet fraud_detection_2 (CTRL+SHIFT+ù) : git subtree push --prefix 01_model_and_data/02_model_and_data_care/02_data_drift/01_fd2_drift_server heroku main
 
-# Push the fraud_detection_2 project to GitHub
-# FROM THE ROOT of the fraud_detection_2 project (CTRL+SHIFT+ù): 
-# git subtree push --prefix 01_model_and_data/02_model_and_data_care/02_data_drift/01_fd2_drift_server heroku main
+# J'ai pas de serveur PostgreSQL en local
+# Faut pousser direct sur Heroku
+# Faire la difference en DEBUG et PRODUCTION
 
-# No local PostgreSQL server available
-# Push changes directly to Heroku
-# Manage differences between DEBUG and PRODUCTION modes
+# Remplacer app.run(debug=True) par app.run() dans main()
+# Ajouter app.config["DEBUG"] = True dans create_app()
+# Faudra l'enlever en mode "production" 
 
-# Replace app.run(debug=True) with app.run() in main()
-# Add app.config["DEBUG"] = True in create_app()
-# This must be removed in "production" mode
 
-# DEBUG -----------------------------------------------------------------------
-# Procfile:
+
+# DEBUG ----------------------------------------------------------------------- 
+# Procfile
 # web: python -m flask --app fd2-drift-server run --host=0.0.0.0 --port=$PORT
-# Note: This uses Flask's built-in server through the main module
+# Comprendre qu'on va passer par le main ce qui permet à Flask d'utiliser son propre serveur intégré
 #
-# Enable debugging on Heroku:
-# heroku config:set FLASK_DEBUG=True --app fd2-drift-server (restart with heroku ps:restart if needed)
+# heroku config:set FLASK_DEBUG=True --app fd2-drift-server (heroku ps:restart si besoin)
 #
-# Refer to create_app() and app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
+# Voir create_app() et app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
+
+
 
 # PRODUCTION ------------------------------------------------------------------
-# Procfile:
+# Procfile
 # web: gunicorn --workers=3 'fd2-drift-server:create_app()'
-# Note: This setup uses nginx, bypasses the main module, and directly calls create_app()
-# See create_app() et app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
+# # Comprendre qu'on va utiliser nginx, plus passer par main mais par create_app()
+# Voir create_app() et app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
 #
-# Disable debugging on Heroku:
 # heroku config:set FLASK_DEBUG=False --app fd2-drift-server
-#
+# 
 
-# DEPLOY ----------------------------------------------------------------------
-# Commit & sync changes in VSCode
-# Push changes to Heroku:
+
+# DEPLOY ------------------------------------------------------------------
+# Commit & Sync in VSCode
 # git subtree push --prefix 01_model_and_data/02_model_and_data_care/02_data_drift/01_fd2_drift_server heroku main
-# Restart the Heroku app:
 # heroku ps:restart --app fd2-drift-server
-# View logs:
 # heroku logs --tail
 
+
 # ----------------------------------------------------------------------
-# Heroku CLI commands:
-# Restart dynos: heroku ps:restart --app fd2-drift-server
-#   (Restarts all dynos by default. Use heroku ps:restart web --app <app_name> to restart specific dynos.)
-# Restart the entire app: heroku restart --app fd2-drift-server
-# Open the app in a browser via CLI: heroku open --app fd2-drift-server
+#   
+# Faire démarrer les dynos en CLI           = heroku ps:restart --app fd2-drift-server # Redemarre certains dyno. Tous par defaut. heroku ps:restart web --app <app_name>
+# Redémarrage global de toute l'application = heroku restart --app fd2-drift-server # 
+# Open App en CLI                           = heroku open --app fd2-drift-server
 
 
 import os
@@ -113,15 +92,23 @@ from flask import Flask, jsonify, request, render_template, abort      #, send_f
 k_Reports_Dir = "./reports"
 k_table_name = "reports"
 
-# PostgreSQL (supporte pas AUTOINCREMENT)
-k_PostgreSQL_Create_Table = f"""
+# SQLite
+# k_SQL_Create_Table = f"""
+# CREATE TABLE {k_table_name} (
+#     id INTEGER PRIMARY KEY AUTOINCREMENT,
+#     report_name TEXT NOT NULL,
+#     created_at TIMESTAMP NOT NULL,
+#     report_content TEXT
+# );"""
+
+# PostgreSQL
+k_SQL_Create_Table = f"""
 CREATE TABLE {k_table_name} (
     id SERIAL PRIMARY KEY,
     report_name TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL,
     report_content TEXT
 );"""
-
 
 
 # ----------------------------------------------------------------------
@@ -133,7 +120,6 @@ if not g_logger.hasHandlers():
     g_logger.addHandler(logging.NullHandler())  # Prevent errors before setup
 
 
-
 # ----------------------------------------------------------------------
 # Global logger
 def set_up_logger(app:Flask, debug_level:bool=True)->None:
@@ -143,8 +129,8 @@ def set_up_logger(app:Flask, debug_level:bool=True)->None:
     # Stream handler for console and Heroku
     stream_handler = logging.StreamHandler(sys.stdout)
 
-    # To have different log levels for local (e.g. DEBUG) and production (INFO) logs
-    # Configure log levels dynamically 
+    # Pour avoir des niveaux de logs différents en local (par exemple DEBUG) et en production (INFO)
+    # Configurer le niveau de logs dynamiquement :
     log_level = logging.DEBUG if debug_level else logging.INFO
     stream_handler.setLevel(log_level)
     
@@ -169,7 +155,6 @@ def set_up_logger(app:Flask, debug_level:bool=True)->None:
     return
 
 
-
 # ----------------------------------------------------------------------
 def extract_created_at_from_filename(filename: str) -> datetime:
     
@@ -184,21 +169,63 @@ def extract_created_at_from_filename(filename: str) -> datetime:
     return datetime.strptime(timestamp_str, "%Y%m%d_%H%M%S")
 
 
+# ----------------------------------------------------------------------
+# On insère potentiellement plusieurs rapports en base.
+# Il est judicieux d'utiliser engine.begin() ici, car on veut garantir que toutes les insertions liées à un appel sont validées ou annulées ensemble en cas d'erreur.
+
+# def update_database(engine: Engine, report_folder: str = k_Reports_Dir) -> None:
+    
+#     g_logger.debug(f"{inspect.stack()[0][3]}()")
+
+#     report_files = os.listdir(report_folder)
+
+#     # Avec un engine.connect() il faut un un commit explicite est nécessaire pour que les changements soient 
+#     # enregistrés dans la base de données
+#     # Pour des des lectures seules sans modifications, ou si la transaction n'est pas nécessaire.
+#     # Pour des scénarios où on gère explicitement les commit() et rollback() (par exemple, dans une logique complexe ou en mode debug).
+#     with engine.connect() as conn:
+#         result = conn.execute(text(f"SELECT report_name FROM {k_table_name}"))
+#         existing_reports = set(row["report_name"] for row in result)
+
+#         for report in report_files:
+#             if report not in existing_reports:
+#                 # Extract created_at from the filename
+#                 try:
+#                     created_at = extract_created_at_from_filename(report)
+#                 except ValueError as e:
+#                     g_logger.info(f"Skipping file '{report}': {e}")
+#                     continue # this report is skipped
+
+#                 # Read the report content
+#                 report_path = os.path.join(report_folder, report)
+#                 with open(report_path, "r", encoding="utf-8") as f:
+#                     content = f.read()
+#                     g_logger.info(f"Content of {report}: {content[:100]}...")  # Log only the first 100 chars
+
+#                 # Insert the report into the database
+#                 # PostgreSQL on passe un dictionnaire + text évite les injections
+#                 conn.execute(
+#                     text(f"""
+#                         INSERT INTO {k_table_name} (report_name, created_at, report_content)
+#                         VALUES (:report_name, :created_at, :report_content)
+#                     """),
+#                     {"report_name": report, "created_at": created_at, "report_content": content},
+#                 )
+#                 conn.commit()  # Ajout explicite du commit
+#                 g_logger.info(f"Added report to database: {report}")
+#                 # os.remove(report_path)
+#                 # g_logger.info(f"{report_path} is removed")
+#     return
 
 # ----------------------------------------------------------------------
-# Potentially, several reports are inserted into the database.
-# It makes sense to use engine.begin() here, as we want to guarantee that all insertions linked to a call are validated or cancelled together in the event of an error.
+# On insère potentiellement plusieurs rapports en base.
+# Il est judicieux d'utiliser engine.begin() ici, car on veut garantir que toutes les insertions liées à un appel sont validées ou annulées ensemble en cas d'erreur.
 def update_database(engine: Engine, report_folder: str = k_Reports_Dir) -> None:
     g_logger.debug(f"{inspect.stack()[0][3]}()")
 
     report_files = os.listdir(report_folder)
 
-    # With engine.begin(), changes are automatically committed or rolled back
-    # With engine.connect(), an explicit commit is required to save changes to the database
-    # engine.connect() should be used for read-only operations without modifications, or when transactions are not required.
-    # Use this approach for scenarios where you explicitly manage commit() and rollback() 
-    # (e.g., in complex logic or in debug mode).
-
+    # Avec engine.begin(), les modifications sont validées ou annulées automatiquement
     with engine.begin() as conn:
         result = conn.execute(text(f"SELECT report_name FROM {k_table_name}"))
         existing_reports = set(row["report_name"] for row in result)
@@ -219,7 +246,7 @@ def update_database(engine: Engine, report_folder: str = k_Reports_Dir) -> None:
                     g_logger.info(f"Content of {report}: {content[:100]}...")
 
                 # Insert the report into the database
-                # PostgreSQL on passe un dictionnaire + text() évite les injections
+#               # PostgreSQL on passe un dictionnaire + text évite les injections
                 conn.execute(
                     text(f"""
                         INSERT INTO {k_table_name} (report_name, created_at, report_content)
@@ -229,14 +256,13 @@ def update_database(engine: Engine, report_folder: str = k_Reports_Dir) -> None:
                 )
                 g_logger.info(f"Added report to database: {report}")
                 # os.remove(report_path)
-                # g_logger.info(f"{report_path} is removed")
+#               # g_logger.info(f"{report_path} is removed")
     return
 
 
-
 # -----------------------------------------------------------------------------
-# This function only checks the existence of a table without modifying the database.
-# Keep using engine.connect() since no transaction is required.
+# Cette fonction vérifie seulement l'existence d'une table sans modifier la base de données.
+# Conserver engine.connect() car aucune transaction n'est nécessaire.
 def check_table_exist(engine, table_name: str) -> bool:
 
     g_logger.debug(f"{inspect.stack()[0][3]}() - Checking table '{table_name}' existence")
@@ -245,20 +271,28 @@ def check_table_exist(engine, table_name: str) -> bool:
     g_logger.info(f"Table '{table_name}' exists: {exists}")
     return exists
 
-
-
 # -----------------------------------------------------------------------------
-# A table is being created, a single and critical operation. If it fails, we want to roll back any changes.
-# Using engine.begin() is appropriate in this case.
+# On crée une table, une opération unique et critique. Si elle échoue, on veut annuler toute modification.
+# Utiliser engine.begin() est adapté ici.
 def create_table(engine) -> None:
     g_logger.debug(f"{inspect.stack()[0][3]}() - Creating table '{k_table_name}'")
     try:
         with engine.begin() as conn:
-            conn.execute(text(k_PostgreSQL_Create_Table))
+            conn.execute(text(k_SQL_Create_Table))
             g_logger.info(f"Table '{k_table_name}' re-created successfully.")
     except SQLAlchemyError as error:
         g_logger.error(f"Error creating table '{k_table_name}': {error}")
-     
+        
+# def create_table(engine) -> None:
+    
+#     g_logger.debug(f"{inspect.stack()[0][3]}() - Creating table '{k_table_name}'")
+#     try:
+#         with engine.connect() as conn:
+#             conn.execute(text(k_SQL_Create_Table))
+#             g_logger.info(f"Table '{k_table_name}' re-created successfully.")
+#             conn.commit()
+#     except SQLAlchemyError as error:
+#         g_logger.error(f"Error creating table '{k_table_name}': {error}")
 
 
 # ----------------------------------------------------------------------
@@ -281,9 +315,10 @@ def init_db() -> Engine:
 
 
 
+
 # ----------------------------------------------------------------------
 # create_app() function is the entry point which configure the Flask app before it runs
-# double check the content of Procfile file AND the FLASK_DEBUG envi variable
+# double check the content of Procfile file
 def create_app() -> Flask:
     
     app = Flask(__name__)
@@ -295,18 +330,8 @@ def create_app() -> Flask:
     # Mais ici le code fonctionne en local ET sur Heroku
     # FLASK_DEBUG est à definir sur Heroku ou avec heroku config:set FLASK_DEBUG=True
     # En local faut utiliser secrets.ps1
-
-    # On Heroku or with Gunicorn :
-    #       Use app.config["DEBUG"] = True because app.run() is not directly invoked.
-    #       Gunicorn manages the application startup and connects directly to create_app().
-    #       FLASK_DEBUG must be defined on Heroku using: heroku config:set FLASK_DEBUG=True
-    #
-    # Locally with Flask only: 
-    #       app.run(debug=True) in the main() would be sufficient to enable debug mode during testing.
-    #       However, in this setup, the code works both locally AND on Heroku.
-    #       Locally, use secrets.ps1 to set the value of FLASK_DEBUG
-
-    # ! os.environ.get() retournait 1
+    
+    # os.environ.get() retournait 1
     app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False").strip().lower() in ("true", "1")
     set_up_logger(app, app.config["DEBUG"])
     
@@ -320,9 +345,9 @@ def create_app() -> Flask:
     with app.app_context():
         engine = init_db()  # Initialise la base de données quand l'application est créée
 
+    # Route must be defined inside create_app() otherwise "app" is not yet defined
     # ----------------------------------------------------------------------
     # Flask routes
-    # Routes must be defined inside create_app() otherwise "app" is not yet defined
     # Route pour afficher la page d'accueil avec le calendrier
     @app.route("/")
     def index():
@@ -330,7 +355,7 @@ def create_app() -> Flask:
         return render_template("index.html")
 
     # ----------------------------------------------------------------------
-    # Route to retrieve reports in the form of JSON events
+    # Route pour récupérer les rapports sous forme d'événements JSON
     @app.route("/get_reports")
     def get_reports():
         g_logger.debug(f"{inspect.stack()[0][3]}()")
@@ -338,7 +363,7 @@ def create_app() -> Flask:
         with engine.connect() as conn:
             # Récupérer tous les rapports
             result = conn.execute(
-                text(f"SELECT id, report_name, created_at FROM {k_table_name}")
+                text("SELECT id, report_name, created_at FROM reports")
             ).mappings()
             rows = [row for row in result]  # Convert to dicts
 
@@ -356,18 +381,18 @@ def create_app() -> Flask:
 
 
     # ----------------------------------------------------------------------
-    # Route to display reports at a specific date
+    # Route pour afficher les rapports d'une date spécifique
     @app.route("/reports")
     def reports_by_date():
         g_logger.debug(f"{inspect.stack()[0][3]}()")
         date = request.args.get("date")
 
         with engine.connect() as conn:
-            # Look for the reports of a specific date
+            # Rechercher les rapports du jour sélectionné
             result = conn.execute(
-                text(f"""
+                text("""
                     SELECT id, report_name, created_at
-                    FROM {k_table_name}
+                    FROM reports
                     WHERE DATE(created_at) = :selected_date
                 """),
                 {"selected_date": date},
@@ -376,10 +401,8 @@ def create_app() -> Flask:
 
         return render_template("reports.html", reports=rows, date=date)
 
-
-
     # ----------------------------------------------------------------------
-    # Route to display one report 
+    # Route pour afficher un rapport spécifique
     @app.route("/report/<int:report_id>")
     def show_report(report_id):
         g_logger.debug(f"{inspect.stack()[0][3]}()")
@@ -387,9 +410,9 @@ def create_app() -> Flask:
         with engine.connect() as conn:
             # Retrieve the report content from the database
             result = conn.execute(
-                text(f"""
+                text("""
                     SELECT report_name, report_content
-                    FROM {k_table_name}
+                    FROM reports
                     WHERE id = :report_id
                 """),
                 {"report_id": report_id},
@@ -404,11 +427,9 @@ def create_app() -> Flask:
         return report_content, 200, {"Content-Type": "text/html"}
 
 
-
     # ----------------------------------------------------------------------
-    # Route to save in the PostgreSQL database the received report 
-    # Reports are no longer "saved" in ./reports
-    # ./reports only exist because when deploying on Heroku the very first time it help to feed the databased and to show few reports
+    # Route pour sauver le rapport reçu dans la base
+    # On ne sauvegarde plus rien dans ./reports
     @app.route("/upload", methods=["POST"])
     def upload_file():
         g_logger.debug(f"{inspect.stack()[0][3]}()")
@@ -423,15 +444,15 @@ def create_app() -> Flask:
         # Read the content of the uploaded file directly
         content = file.read().decode("utf-8")  # Decode bytes to string
 
-        # Save the report into the database
-        # engine.begin() => no explicit commit required
-        # engine.begin() is used for transactional operations where multiple steps need to be completed together
-        # or rolled back in case of an error (e.g., multiple inserts or conditional deletions).
-        # Use it to ensure a transaction is properly committed or rolled back, even in case of exceptions.
+        # Save the report to the database
+        # engine.begin() => pas besoin de commit explicite
+        # engine.begin() pour des opérations transactionnelles où plusieurs étapes doivent être réalisées ensemble 
+        # ou annulées en cas d'erreur (comme des insertions multiples ou des suppressions conditionnelles).
+        # Lorsque qu'on veut garantir qu'une transaction est bien terminée ou annulée, même en cas d'exception.
         with engine.begin() as conn:
             conn.execute(
-                text(f"""
-                    INSERT INTO {k_table_name} (report_name, created_at, report_content)
+                text("""
+                    INSERT INTO reports (report_name, created_at, report_content)
                     VALUES (:report_name, :created_at, :report_content)
                 """),
                 {
@@ -446,26 +467,23 @@ def create_app() -> Flask:
     return app
 
 
-
 # ----------------------------------------------------------------------
 if __name__ == "__main__":
 
     os.chdir(Path(__file__).parent)
-
-    # In debug mode, Flask uses a reloader (Werkzeug) that restarts the application to detect changes in the source code.
-    # This restart results in two initializations:
-    #   The first process starts Flask and initializes the application.
-    #   The reloader starts a new instance of the process to enable hot reloading.
-    # Solution to avoid duplicates:
-    #   Add a condition to check if the application is started by the reloader or directly by Flask.
-
-    # This should not be confused with the fact that in production mode, we may have 3 working threads, 3 initializations etc. (see logs)
+    
+    # En mode debug, Flask utilise un reloader (Werkzeug) qui redémarre l'application pour détecter les modifications dans le code source. 
+    # Ce redémarrage entraîne deux initialisations :
+    #   Le premier processus démarre Flask et initialise l'application.
+    #   Le reloader démarre une nouvelle instance du processus pour activer le rechargement à chaud.
+    # Solution pour éviter les doublons :
+    #   Ajouter une condition pour vérifier si l'application est démarrée par le reloader ou directement par Flask
     if os.environ.get("WERKZEUG_RUN_MAIN") == True:
-        # This block is executed by the reloader process
+        # Ce bloc est exécuté uniquement par le processus reloader
         app = create_app()
         g_logger.debug(f"{inspect.stack()[0][3]}()")
         g_logger.debug(f"Répertoire courant : {Path.cwd()}")
-        # app.run(debug=True) is useless here see in the create_app() function, the app.config["DEBUG"] = ...
+        # app.run(debug=True) inutile voir create_app() et app.config["DEBUG"] = ...
         app.run()
 
 
