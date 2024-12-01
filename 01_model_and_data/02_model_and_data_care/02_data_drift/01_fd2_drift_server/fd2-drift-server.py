@@ -37,8 +37,8 @@ def create_app() -> Flask:
     # Ensure .env exists and load variables
     os.chdir(Path(__file__).parent)
     env_path = Path(".env")
-    if not env_path.is_file():
-        raise FileNotFoundError(".env file is missing. Create one at the root of the project.")
+    # if not env_path.is_file():
+        # raise FileNotFoundError(".env file is missing. Create one at the root of the project.")
     load_dotenv(dotenv_path=env_path)
 
     app = Flask(__name__)
