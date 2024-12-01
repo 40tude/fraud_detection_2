@@ -43,7 +43,7 @@ def register_routes(app):
             # Let the global SQLAlchemy error handler take over
             raise
         except Exception as e:
-            app.logger.error(f"Error in get_reports route: {e}")
+            g_logger.error(f"Error in get_reports route: {e}")
             raise  # Let the global error handler take over
 
     @app.route("/report/<int:report_id>")
@@ -65,7 +65,7 @@ def register_routes(app):
         except SQLAlchemyError:
             raise
         except Exception as e:
-            app.logger.error(f"Error in show_report route: {e}")
+            g_logger.error(f"Error in show_report route: {e}")
             raise
 
 
