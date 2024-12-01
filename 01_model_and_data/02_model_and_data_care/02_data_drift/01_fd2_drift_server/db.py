@@ -1,11 +1,15 @@
 import os
 from datetime import datetime
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import scoped_session, sessionmaker, Session
 from sqlalchemy.exc import SQLAlchemyError
 from config import Config
 import logging
 import re
+
+# -----------------------------------------------------------------------------
+# For Mypy
+from typing import Optional
 
 g_logger = logging.getLogger("fraud_detection_2_drift_server")
 
@@ -15,6 +19,8 @@ engine = create_engine(Config.SQLALCHEMY_DATABASE_URI, pool_pre_ping=True)
 # ScopedSession ensures thread-safe database sessions
 db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
 
+
+# -----------------------------------------------------------------------------
 def extract_created_at_from_filename(filename: str) -> datetime:
     """
     Extracts the datetime from the report filename.
@@ -28,7 +34,8 @@ def extract_created_at_from_filename(filename: str) -> datetime:
     return datetime.strptime(timestamp_str, "%Y%m%d_%H%M%S")
 
 
-def update_database(report_folder: str = "./reports"):
+# -----------------------------------------------------------------------------
+def update_database(report_folder: str = "./reports") -> None:
     """
     Updates the database with reports found in the specified folder.
 
@@ -46,7 +53,7 @@ def update_database(report_folder: str = "./reports"):
 
         # Fetch existing reports from the database
         with session.begin():
-            # SQLAlchemy's .mappings() method converts each line of the result into a dictionary. 
+            # SQLAlchemy's .mappings() method converts each line of the result into a dictionary.
             # This approach is compatible with an SQLAlchemy session.
             result = session.execute(text("SELECT report_name FROM reports")).mappings()
             existing_reports = {row["report_name"] for row in result}
@@ -71,10 +78,12 @@ def update_database(report_folder: str = "./reports"):
 
                     # Insert the report into the database
                     session.execute(
-                        text("""
+                        text(
+                            """
                             INSERT INTO reports (report_name, created_at, report_content)
                             VALUES (:report_name, :created_at, :report_content)
-                        """),
+                        """
+                        ),
                         {"report_name": report, "created_at": created_at, "report_content": content},
                     )
                     g_logger.info(f"Added report to database: {report}")
@@ -89,16 +98,16 @@ def update_database(report_folder: str = "./reports"):
         g_logger.error(f"Database error during update_database: {e}")
         raise
 
-def init_db():
+
+# -----------------------------------------------------------------------------
+def init_db() -> None:
     """
     Initializes the database by checking or creating the necessary tables.
     """
     try:
         # Check table existence
         with engine.connect() as conn:
-            result = conn.execute(
-                text("SELECT 1 FROM information_schema.tables WHERE table_name='reports'")
-            ).fetchone()
+            result = conn.execute(text("SELECT 1 FROM information_schema.tables WHERE table_name='reports'")).fetchone()
             if not result:
                 create_table()
                 g_logger.info("Reports table created successfully.")
@@ -111,7 +120,8 @@ def init_db():
         raise
 
 
-def create_table():
+# -----------------------------------------------------------------------------
+def create_table() -> None:
     """
     Creates the `reports` table in the database.
     """
@@ -132,7 +142,9 @@ def create_table():
         raise
 
 
-def get_session():
+# -----------------------------------------------------------------------------
+# This indicates that the function returns an instance of scoped_session, specialized for SQLAlchemy Session objects.
+def get_session() -> scoped_session[Session]:
     """
     Provides the current scoped session.
     Use this function to get a database session in your routes or logic.
@@ -140,9 +152,12 @@ def get_session():
     return db_session
 
 
-def shutdown_session(exception=None):
+# -----------------------------------------------------------------------------
+# def shutdown_session(exception: Exception | None = None) -> None:
+def shutdown_session(exception: Optional[BaseException] = None) -> None:
     """
     Removes the session at the end of the request to avoid leaks.
     This should be registered with Flask's teardown_appcontext.
     """
     db_session.remove()
+    return

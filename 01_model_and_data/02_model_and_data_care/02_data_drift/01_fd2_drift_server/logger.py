@@ -4,10 +4,15 @@ import logging
 import sys
 from flask import Flask
 
+# -----------------------------------------------------------------------------
+# For Mypy
+
+
 g_logger = logging.getLogger("fraud_detection_2_drift_server")
 g_logger.setLevel(logging.WARNING)  # Default minimal level to suppress logs
 
 
+# -----------------------------------------------------------------------------
 def set_up_logger(app: Flask, debug_level: bool = True) -> None:
     """
     Configures the global logger with console output.
@@ -24,9 +29,7 @@ def set_up_logger(app: Flask, debug_level: bool = True) -> None:
     stream_handler.setLevel(log_level)
 
     # Format log output
-    formatter = logging.Formatter(
-        "%(asctime)s [%(levelname)s] %(name)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
-    )
+    formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
     stream_handler.setFormatter(formatter)
 
     # Prevent multiple handlers in case of reinitialization

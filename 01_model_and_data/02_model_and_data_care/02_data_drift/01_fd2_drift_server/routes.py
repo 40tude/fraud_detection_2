@@ -1,33 +1,44 @@
 # routes.py
 
-from flask import jsonify, render_template, request, abort, jsonify
+from flask import Flask, jsonify, render_template, request, abort, jsonify, Response
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import text
 from db import get_session
 import logging
 from datetime import datetime
 
+
+# -----------------------------------------------------------------------------
+# For Mypy
+from flask.typing import ResponseReturnValue
+from typing import Callable
+
+RouteFunction = Callable[..., str]
+
 g_logger = logging.getLogger("fraud_detection_2_drift_server")
 
-def register_routes(app):
+
+# -----------------------------------------------------------------------------
+def register_routes(app: Flask) -> None:
     """
     Registers all routes to the Flask app.
 
     Parameters:
     - app (Flask): Flask application instance.
     """
+
+    # -------------------------------------------------------------------------
     @app.route("/")
-    def index():
+    def index() -> str:
         return render_template("index.html")
 
+    # -------------------------------------------------------------------------
     @app.route("/get_reports")
-    def get_reports():
+    def get_reports() -> Response:
         session = get_session()
         try:
             # Query the database using the session
-            result = session.execute(
-                text("SELECT id, report_name, created_at FROM reports")
-            ).mappings()
+            result = session.execute(text("SELECT id, report_name, created_at FROM reports")).mappings()
             rows = [row for row in result]
 
             # Format for FullCalendar
@@ -47,17 +58,20 @@ def register_routes(app):
             g_logger.error(f"Error in get_reports route: {e}")
             raise  # Let the global error handler take over
 
+    # -------------------------------------------------------------------------
     @app.route("/report/<int:report_id>")
-    def show_report(report_id):
+    def show_report(report_id: int) -> tuple[str, int, dict[str, str]]:
         session = get_session()
         try:
             # Retrieve report content
-            result = session.execute(
-                text(
-                    "SELECT report_name, report_content FROM reports WHERE id = :report_id"
-                ),
-                {"report_id": report_id},
-            ).mappings().fetchone()
+            result = (
+                session.execute(
+                    text("SELECT report_name, report_content FROM reports WHERE id = :report_id"),
+                    {"report_id": report_id},
+                )
+                .mappings()
+                .fetchone()
+            )
 
             if not result:
                 abort(404, description="Report not found")
@@ -69,9 +83,9 @@ def register_routes(app):
             g_logger.error(f"Error in show_report route: {e}")
             raise
 
-
+    # -------------------------------------------------------------------------
     @app.route("/reports")
-    def reports_by_date():
+    def reports_by_date() -> str:
 
         # Get the date parameter from the query string
         date = request.args.get("date")
@@ -82,11 +96,13 @@ def register_routes(app):
         try:
             # Query to fetch reports for the given date
             result = session.execute(
-                text("""
+                text(
+                    """
                     SELECT id, report_name, created_at
                     FROM reports
                     WHERE DATE(created_at) = :selected_date
-                """),
+                """
+                ),
                 {"selected_date": date},
             ).mappings()
             rows = [row for row in result]
@@ -97,11 +113,11 @@ def register_routes(app):
 
         # Render the template with the reports
         return render_template("reports.html", reports=rows, date=date)
-    
 
-
+    # -------------------------------------------------------------------------
     @app.route("/upload", methods=["POST"])
-    def upload_file():
+    # def upload_file() -> Tuple[Response, int]:
+    def upload_file() -> ResponseReturnValue:
         g_logger.debug("Entering /upload")
 
         # Check if the request contains a file part
@@ -124,10 +140,12 @@ def register_routes(app):
             session = get_session()
             with session.begin():
                 session.execute(
-                    text("""
+                    text(
+                        """
                         INSERT INTO reports (report_name, created_at, report_content)
                         VALUES (:report_name, :created_at, :report_content)
-                    """),
+                    """
+                    ),
                     {
                         "report_name": file.filename,
                         "created_at": datetime.now(),
@@ -135,15 +153,15 @@ def register_routes(app):
                     },
                 )
                 g_logger.info(f"Saved report '{file.filename}' to the database.")
-        
+
         except UnicodeDecodeError as e:
             g_logger.error(f"Failed to decode file '{file.filename}': {e}")
             return jsonify({"error": "Failed to decode the file content"}), 400
-        
+
         except SQLAlchemyError as e:
             g_logger.error(f"Database error while saving report '{file.filename}': {e}")
             return jsonify({"error": "Database error occurred"}), 500
-        
+
         except Exception as e:
             g_logger.error(f"Unexpected error while uploading file '{file.filename}': {e}")
             return jsonify({"error": "An unexpected error occurred"}), 500

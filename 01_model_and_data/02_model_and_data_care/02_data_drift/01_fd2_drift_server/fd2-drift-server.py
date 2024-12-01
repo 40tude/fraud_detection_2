@@ -25,21 +25,19 @@
 #
 
 
-
 # Refactor de fd2-drift-server.py
 # Split in 5 differents files
 
 
-
 # Passage à dotenv
-#   l'installer : conda install python-dotenv -c conda-forge -y 
+#   l'installer : conda install python-dotenv -c conda-forge -y
 #   l'ajouter à requirements.txt
 #   Créer ficheir .env
 #   Modif de config.py
 #   Virer secrets.ps1
 #   Modif de fd2-drift-server.py pour vérifier si .env est bien là
 
-# Passage à ScopedSession 
+# Passage à ScopedSession
 #   ScopedSession garantit que chaque thread a sa propre session.
 #   Modif de db.py
 #   Modif de fd2-drift-server.py (shutdown_session et app.teardown_appcontext(shutdown_session))
@@ -57,7 +55,6 @@
 #   Modfifier templates/reports.html
 
 
-
 # ----------------------------------------------------------------------
 from flask import Flask, jsonify
 from sqlalchemy.exc import SQLAlchemyError
@@ -69,6 +66,12 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 
+# ----------------------------------------------------------------------
+# For mypy
+# from flask.typing import ResponseReturnValue
+# from typing import Callable
+
+# RouteFunction = Callable[..., str]
 
 
 # ----------------------------------------------------------------------
@@ -82,7 +85,7 @@ def create_app() -> Flask:
     os.chdir(Path(__file__).parent)
     env_path = Path(".env")
 
-    # The app use env variables under Heroku and .env content under Windows 11  
+    # The app use env variables under Heroku and .env content under Windows 11
     is_heroku = os.getenv("DYNO") is not None  # Heroku sets the DYNO environment variable
     if not is_heroku and not env_path.is_file():
         raise FileNotFoundError(".env file is missing. Create one at the root of the project.")
@@ -108,17 +111,14 @@ def create_app() -> Flask:
     # Remove the database session after each request
     app.teardown_appcontext(shutdown_session)
 
-
     # Register global error handlers
     register_error_handlers(app)
 
     return app
 
 
-
-
 # ----------------------------------------------------------------------
-def register_error_handlers(app: Flask):
+def register_error_handlers(app: Flask) -> None:
     """
     Registers global error handlers for the Flask application.
 
@@ -127,25 +127,19 @@ def register_error_handlers(app: Flask):
     """
 
     @app.errorhandler(SQLAlchemyError)
-    def handle_sqlalchemy_error(error):
+    def handle_sqlalchemy_error(error: SQLAlchemyError) -> tuple[Response, int]:
         app.logger.error(f"Database error: {error}")
         return jsonify({"error": "A database error occurred"}), 500
 
     @app.errorhandler(FileNotFoundError)
-    def handle_file_not_found_error(error):
+    def handle_file_not_found_error(error: FileNotFoundError) -> tuple[Response, int]:
         app.logger.error(f"File not found: {error}")
         return jsonify({"error": "The requested file was not found"}), 404
 
     @app.errorhandler(Exception)
-    def handle_general_exception(error):
+    def handle_general_exception(error: Exception) -> tuple[Response, int]:
         app.logger.error(f"An unexpected error occurred: {error}")
         return jsonify({"error": "An unexpected error occurred"}), 500
-
-
-
-
-
-
 
 
 # ----------------------------------------------------------------------
@@ -154,4 +148,3 @@ if __name__ == "__main__":
     app = create_app()
     # app.run(host="0.0.0.0", port=5000)
     app.run()
-
