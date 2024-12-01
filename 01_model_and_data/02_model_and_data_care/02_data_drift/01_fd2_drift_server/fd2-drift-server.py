@@ -44,7 +44,8 @@
 #   Modifier db.py et ajouter update_database() avec gestion des exceptions pour les fichiers
 #   et appeler update_database()
 
-from flask import Flask
+from flask import Flask, jsonify
+from sqlalchemy.exc import SQLAlchemyError
 from config import Config
 from db import init_db, shutdown_session
 from logger import set_up_logger
