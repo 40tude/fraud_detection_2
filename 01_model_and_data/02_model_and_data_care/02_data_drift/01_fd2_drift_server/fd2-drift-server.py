@@ -273,7 +273,7 @@ def create_app() -> Flask:
     # Mais bon ici le code fonctionne en local ET sur Heroku
     # FLASK_DEBUG est à definir sur Heroku ou avec heroku config:set FLASK_DEBUG=True
     # En local faut utiliser secrtes.ps1
-    app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
+    app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False").strip().lower() == "true"
     g_logger.warning(f"Dans main, app.config[DEBUG] = {app.config["DEBUG"] }")
     
     set_up_logger(app, app.config["DEBUG"])
