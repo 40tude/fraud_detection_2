@@ -17,11 +17,8 @@
 #   Modif routes.py pour utiliser ScopedSession
 
 # Gestion des exceptions
-#   Modifier fd2-drift-server.py pour ajouter un gestionnaire global pour les erreurs Flask
-#   Voir register_error_handlers(app)
-#   Modifier routes.py pour y ajouter une gestion centralisée des exceptions
-#   Modifier db.py et ajouter update_database() avec gestion des exceptions pour les fichiers
-#   et appeler update_database()
+#   Modifier fd2-drift-server.py
+
 
 from flask import Flask
 from config import Config
@@ -43,14 +40,11 @@ def create_app() -> Flask:
     # Ensure .env exists and load variables
     os.chdir(Path(__file__).parent)
     env_path = Path(".env")
-
-    # The app use env variables under Heroku and .env content under Windows 11  
     # Should be done iff it runs on Windows 11
-    is_heroku = os.getenv("DYNO") is not None  # Heroku sets the DYNO environment variable
-    if not is_heroku and not env_path.is_file():
-        raise FileNotFoundError(".env file is missing. Create one at the root of the project.")
-
+    # if not env_path.is_file():
+        # raise FileNotFoundError(".env file is missing. Create one at the root of the project.")
     # if .env is NOT available, no exception and returns False
+    # The app use env variables under Heroku and .env content under Windows 11    
     load_dotenv(dotenv_path=env_path)
 
     app = Flask(__name__)
@@ -71,44 +65,7 @@ def create_app() -> Flask:
     # Remove the database session after each request
     app.teardown_appcontext(shutdown_session)
 
-
-    # Register global error handlers
-    register_error_handlers(app)
-
     return app
-
-
-
-
-
-def register_error_handlers(app: Flask):
-    """
-    Registers global error handlers for the Flask application.
-
-    Parameters:
-    - app (Flask): The Flask application instance.
-    """
-
-    @app.errorhandler(SQLAlchemyError)
-    def handle_sqlalchemy_error(error):
-        app.logger.error(f"Database error: {error}")
-        return jsonify({"error": "A database error occurred"}), 500
-
-    @app.errorhandler(FileNotFoundError)
-    def handle_file_not_found_error(error):
-        app.logger.error(f"File not found: {error}")
-        return jsonify({"error": "The requested file was not found"}), 404
-
-    @app.errorhandler(Exception)
-    def handle_general_exception(error):
-        app.logger.error(f"An unexpected error occurred: {error}")
-        return jsonify({"error": "An unexpected error occurred"}), 500
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
