@@ -267,6 +267,7 @@ def create_app() -> Flask:
 
     app = Flask(__name__)
 
+
     # Sur Heroku ou avec Gunicorn. 
     # Utilise app.config["DEBUG"] = True car app.run() n’est pas directement invoqué. Gunicorn contrôle le démarrage de l’application.
     # En local avec Flask uniquement : app.run(debug=True) serait suffisant pour activer le mode debug pendant les tests. 
@@ -274,7 +275,8 @@ def create_app() -> Flask:
     # FLASK_DEBUG est à definir sur Heroku ou avec heroku config:set FLASK_DEBUG=True
     # En local faut utiliser secrtes.ps1
     app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False").strip().lower() == "true"
-    g_logger.warning(f"Dans main, app.config[DEBUG] = {app.config["DEBUG"] }")
+    g_logger.info(f"Type of app.config['DEBUG']: {type(app.config['DEBUG'])}")
+    g_logger.info(f"Va   of app.config['DEBUG']: {app.config['DEBUG']}")
     
     set_up_logger(app, app.config["DEBUG"])
     
