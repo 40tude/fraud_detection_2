@@ -279,8 +279,6 @@ def create_app() -> Flask:
     
     # app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False").strip().lower() == "true"
     app.config["DEBUG"] = True
-    g_logger.info(f"Type of app.config['DEBUG']: {type(app.config['DEBUG'])}")
-    g_logger.info(f"Va   of app.config['DEBUG']: {app.config['DEBUG']}")
     
     # set_up_logger(app, app.config["DEBUG"])
     set_up_logger(app, True)
@@ -288,7 +286,11 @@ def create_app() -> Flask:
     g_logger.debug(f"{inspect.stack()[0][3]}()")
     
     g_logger.debug(f"FLASK_DEBUG via os.environ.get = {os.environ.get("FLASK_DEBUG")}")
+    g_logger.debug(f"Type  of app.config['DEBUG']: {type(app.config['DEBUG'])}")
+    g_logger.debug(f"Value of app.config['DEBUG']: {app.config['DEBUG']}")
     
+
+
     # If you run the app locally you must run ./secrets.ps1 first 
     # In production on Heroku DRIFT_SERVER_SECRET_KEY must have been set manually (see readme.md)
     # Without session key, Flask does not allow the app to set or access the session dictionary
