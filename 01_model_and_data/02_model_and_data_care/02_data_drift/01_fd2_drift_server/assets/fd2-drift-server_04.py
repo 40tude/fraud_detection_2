@@ -123,6 +123,7 @@ def update_database(report_folder: str = k_Reports_Dir) -> None:
 
 
                 # Insert the report into the database
+                # SQLite on passe un tuple
                 conn.execute(
                     f"""
                         INSERT INTO {k_table_name} (report_name, created_at, report_content)
@@ -130,6 +131,15 @@ def update_database(report_folder: str = k_Reports_Dir) -> None:
                     """,
                     (report, created_at, content),
                 )
+                
+                # Compatible PostgreSQL - text vient de SQLAlchemy (qu'il faut installer du coup)
+                # conn.execute(
+                #     text(f"""
+                #         INSERT INTO {k_table_name} (report_name, created_at, report_content)
+                #         VALUES (:report_name, :created_at, :report_content)
+                #     """),
+                #     {"report_name": report, "created_at": created_at, "report_content": content},
+                # )
                 conn.commit() # Ajout explicite du commit
                 g_logger.info(f"Added report to database: {report}")
     return

@@ -109,20 +109,13 @@ CREATE TABLE {k_table_name} (
 # Global logger - Default minimal configuration
 # DEBUG INFO WARNING ERROR CRITICAL
 g_logger = logging.getLogger("fraud_detection_2_drift_server")
-g_logger.setLevel(logging.INFO)  # WARNING Minimal level to prevent unwanted logs
+g_logger.setLevel(logging.WARNING)  # WARNING Minimal level to prevent unwanted logs
 if not g_logger.hasHandlers():
     g_logger.addHandler(logging.NullHandler())  # Prevent errors before setup
 
 
 # ----------------------------------------------------------------------
 # Global logger
-# logging.basicConfig(level=logging.INFO)
-# # logging.basicConfig(
-# #     level=logging.INFO,
-# #     format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
-# #     datefmt='%Y-%m-%d %H:%M:%S'
-# # )
-# g_logger = logging.getLogger("fraud_detection_2_drift_server")
 def set_up_logger(app:Flask, debug_level:bool=True)->None:
     
     global g_logger
@@ -144,8 +137,6 @@ def set_up_logger(app:Flask, debug_level:bool=True)->None:
 
     # Set the global logger level
     g_logger.setLevel(log_level)
-
-    
     
     # Redirect Flask logs to the global logger (only if Gunicorn is available)
     gunicorn_logger = logging.getLogger("gunicorn.error")
@@ -155,7 +146,6 @@ def set_up_logger(app:Flask, debug_level:bool=True)->None:
 
     g_logger.info("=== NEW SESSION START ===")
     g_logger.info(f"DEBUG mode is {'ON' if debug_level else 'OFF'}")
-
     return
 
 
@@ -174,13 +164,63 @@ def extract_created_at_from_filename(filename: str) -> datetime:
 
 
 # ----------------------------------------------------------------------
-def update_database(engine: Engine, report_folder: str = k_Reports_Dir) -> None:
+# On insère potentiellement plusieurs rapports en base.
+# Il est judicieux d'utiliser engine.begin() ici, car on veut garantir que toutes les insertions liées à un appel sont validées ou annulées ensemble en cas d'erreur.
+
+# def update_database(engine: Engine, report_folder: str = k_Reports_Dir) -> None:
     
+#     g_logger.debug(f"{inspect.stack()[0][3]}()")
+
+#     report_files = os.listdir(report_folder)
+
+#     # Avec un engine.connect() il faut un un commit explicite est nécessaire pour que les changements soient 
+#     # enregistrés dans la base de données
+#     # Pour des des lectures seules sans modifications, ou si la transaction n'est pas nécessaire.
+#     # Pour des scénarios où on gère explicitement les commit() et rollback() (par exemple, dans une logique complexe ou en mode debug).
+#     with engine.connect() as conn:
+#         result = conn.execute(text(f"SELECT report_name FROM {k_table_name}"))
+#         existing_reports = set(row["report_name"] for row in result)
+
+#         for report in report_files:
+#             if report not in existing_reports:
+#                 # Extract created_at from the filename
+#                 try:
+#                     created_at = extract_created_at_from_filename(report)
+#                 except ValueError as e:
+#                     g_logger.info(f"Skipping file '{report}': {e}")
+#                     continue # this report is skipped
+
+#                 # Read the report content
+#                 report_path = os.path.join(report_folder, report)
+#                 with open(report_path, "r", encoding="utf-8") as f:
+#                     content = f.read()
+#                     g_logger.info(f"Content of {report}: {content[:100]}...")  # Log only the first 100 chars
+
+#                 # Insert the report into the database
+#                 # PostgreSQL on passe un dictionnaire + text évite les injections
+#                 conn.execute(
+#                     text(f"""
+#                         INSERT INTO {k_table_name} (report_name, created_at, report_content)
+#                         VALUES (:report_name, :created_at, :report_content)
+#                     """),
+#                     {"report_name": report, "created_at": created_at, "report_content": content},
+#                 )
+#                 conn.commit()  # Ajout explicite du commit
+#                 g_logger.info(f"Added report to database: {report}")
+#                 # os.remove(report_path)
+#                 # g_logger.info(f"{report_path} is removed")
+#     return
+
+# ----------------------------------------------------------------------
+# On insère potentiellement plusieurs rapports en base.
+# Il est judicieux d'utiliser engine.begin() ici, car on veut garantir que toutes les insertions liées à un appel sont validées ou annulées ensemble en cas d'erreur.
+def update_database(engine: Engine, report_folder: str = k_Reports_Dir) -> None:
     g_logger.debug(f"{inspect.stack()[0][3]}()")
 
     report_files = os.listdir(report_folder)
 
-    with engine.connect() as conn:
+    # Avec engine.begin(), les modifications sont validées ou annulées automatiquement
+    with engine.begin() as conn:
         result = conn.execute(text(f"SELECT report_name FROM {k_table_name}"))
         existing_reports = set(row["report_name"] for row in result)
 
@@ -191,19 +231,16 @@ def update_database(engine: Engine, report_folder: str = k_Reports_Dir) -> None:
                     created_at = extract_created_at_from_filename(report)
                 except ValueError as e:
                     g_logger.info(f"Skipping file '{report}': {e}")
-                    continue # this report is skipped
+                    continue
 
                 # Read the report content
                 report_path = os.path.join(report_folder, report)
                 with open(report_path, "r", encoding="utf-8") as f:
                     content = f.read()
-                    g_logger.info(f"Content of {report}: {content[:100]}...")  # Log only the first 100 chars
-
-                # if not content.strip():
-                #     g_logger.warning(f"File {report} is empty or could not be read correctly!")
-                #     continue  # Skip this file
+                    g_logger.info(f"Content of {report}: {content[:100]}...")
 
                 # Insert the report into the database
+#               # PostgreSQL on passe un dictionnaire + text évite les injections
                 conn.execute(
                     text(f"""
                         INSERT INTO {k_table_name} (report_name, created_at, report_content)
@@ -211,13 +248,15 @@ def update_database(engine: Engine, report_folder: str = k_Reports_Dir) -> None:
                     """),
                     {"report_name": report, "created_at": created_at, "report_content": content},
                 )
-                conn.commit()  # Ajout explicite du commit
                 g_logger.info(f"Added report to database: {report}")
                 # os.remove(report_path)
-                # g_logger.info(f"{report_path} is removed")
+#               # g_logger.info(f"{report_path} is removed")
     return
 
+
 # -----------------------------------------------------------------------------
+# Cette fonction vérifie seulement l'existence d'une table sans modifier la base de données.
+# Conserver engine.connect() car aucune transaction n'est nécessaire.
 def check_table_exist(engine, table_name: str) -> bool:
 
     g_logger.debug(f"{inspect.stack()[0][3]}() - Checking table '{table_name}' existence")
@@ -227,16 +266,27 @@ def check_table_exist(engine, table_name: str) -> bool:
     return exists
 
 # -----------------------------------------------------------------------------
+# On crée une table, une opération unique et critique. Si elle échoue, on veut annuler toute modification.
+# Utiliser engine.begin() est adapté ici.
 def create_table(engine) -> None:
-    
     g_logger.debug(f"{inspect.stack()[0][3]}() - Creating table '{k_table_name}'")
     try:
-        with engine.connect() as conn:
+        with engine.begin() as conn:
             conn.execute(text(k_SQL_Create_Table))
             g_logger.info(f"Table '{k_table_name}' re-created successfully.")
-            conn.commit()
     except SQLAlchemyError as error:
         g_logger.error(f"Error creating table '{k_table_name}': {error}")
+        
+# def create_table(engine) -> None:
+    
+#     g_logger.debug(f"{inspect.stack()[0][3]}() - Creating table '{k_table_name}'")
+#     try:
+#         with engine.connect() as conn:
+#             conn.execute(text(k_SQL_Create_Table))
+#             g_logger.info(f"Table '{k_table_name}' re-created successfully.")
+#             conn.commit()
+#     except SQLAlchemyError as error:
+#         g_logger.error(f"Error creating table '{k_table_name}': {error}")
 
 
 # ----------------------------------------------------------------------
@@ -267,16 +317,16 @@ def create_app() -> Flask:
     
     app = Flask(__name__)
 
-
     # Sur Heroku ou avec Gunicorn. 
-    # Utilise app.config["DEBUG"] = True car app.run() n’est pas directement invoqué. Gunicorn contrôle le démarrage de l’application.
-    # En local avec Flask uniquement : app.run(debug=True) serait suffisant pour activer le mode debug pendant les tests. 
-    # Mais bon ici le code fonctionne en local ET sur Heroku
+    # Utilise app.config["DEBUG"] = True car app.run() n’est pas directement invoqué. 
+    # Gunicorn contrôle le démarrage de l’application et il se branche sur create_app() directement
+    # En local avec Flask uniquement : app.run(debug=True) dans le main() serait suffisant pour activer le mode debug pendant les tests. 
+    # Mais ici le code fonctionne en local ET sur Heroku
     # FLASK_DEBUG est à definir sur Heroku ou avec heroku config:set FLASK_DEBUG=True
     # En local faut utiliser secrets.ps1
     
+    # os.environ.get() retournait 1
     app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False").strip().lower() in ("true", "1")
-    
     set_up_logger(app, app.config["DEBUG"])
     
     g_logger.debug(f"{inspect.stack()[0][3]}()")
@@ -389,6 +439,10 @@ def create_app() -> Flask:
         content = file.read().decode("utf-8")  # Decode bytes to string
 
         # Save the report to the database
+        # engine.begin() => pas besoin de commit explicite
+        # engine.begin() pour des opérations transactionnelles où plusieurs étapes doivent être réalisées ensemble 
+        # ou annulées en cas d'erreur (comme des insertions multiples ou des suppressions conditionnelles).
+        # Lorsque qu'on veut garantir qu'une transaction est bien terminée ou annulée, même en cas d'exception.
         with engine.begin() as conn:
             conn.execute(
                 text("""
@@ -414,10 +468,10 @@ if __name__ == "__main__":
     
     # En mode debug, Flask utilise un reloader (Werkzeug) qui redémarre l'application pour détecter les modifications dans le code source. 
     # Ce redémarrage entraîne deux initialisations :
-    #       Le premier processus démarre Flask et initialise l'application.
-    #       Le reloader démarre une nouvelle instance du processus pour activer le rechargement à chaud.
+    #   Le premier processus démarre Flask et initialise l'application.
+    #   Le reloader démarre une nouvelle instance du processus pour activer le rechargement à chaud.
     # Solution pour éviter les doublons :
-    #       Ajouter une condition pour vérifier si l'application est démarrée par le reloader ou directement par Flask
+    #   Ajouter une condition pour vérifier si l'application est démarrée par le reloader ou directement par Flask
     if os.environ.get("WERKZEUG_RUN_MAIN") == True:
         # Ce bloc est exécuté uniquement par le processus reloader
         app = create_app()
