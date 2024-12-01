@@ -36,12 +36,9 @@ def register_routes(app):
                 for row in rows
             ]
             return jsonify(events)
-        except SQLAlchemyError:
-            # Let the global SQLAlchemy error handler take over
-            raise
-        except Exception as e:
-            app.logger.error(f"Error in get_reports route: {e}")
-            raise  # Let the global error handler take over
+        except SQLAlchemyError as e:
+            app.logger.error(f"Error fetching reports: {e}")
+            return jsonify({"error": "Database error"}), 500
 
     @app.route("/report/<int:report_id>")
     def show_report(report_id):
@@ -59,8 +56,6 @@ def register_routes(app):
                 abort(404, description="Report not found")
 
             return result["report_content"], 200, {"Content-Type": "text/html"}
-        except SQLAlchemyError:
-            raise
-        except Exception as e:
-            app.logger.error(f"Error in show_report route: {e}")
-            raise
+        except SQLAlchemyError as e:
+            app.logger.error(f"Error fetching report {report_id}: {e}")
+            return jsonify({"error": "Database error"}), 500
