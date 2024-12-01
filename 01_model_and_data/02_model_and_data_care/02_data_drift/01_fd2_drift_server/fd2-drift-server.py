@@ -154,7 +154,7 @@ def set_up_logger(app:Flask, debug_level:bool=True)->None:
         app.logger.setLevel(g_logger.level)  # Align Flask log level with g_logger
 
     g_logger.info("=== NEW SESSION START ===")
-    g_logger.info(f"DEBUG mode is {'ON' if app.config['DEBUG'] else 'OFF'}")
+    g_logger.info(f"DEBUG mode is {'ON' if debug_level else 'OFF'}")
 
     return
 
@@ -224,14 +224,6 @@ def check_table_exist(engine, table_name: str) -> bool:
     inspector = sqlalchemy_inspect(engine)
     exists = inspector.has_table(table_name)
     g_logger.info(f"Table '{table_name}' exists: {exists}")
-    
-    # TODO : à virer
-    # with engine.connect() as conn:
-    #     conn.execute(text(f"DROP TABLE IF EXISTS {table_name}"))
-    #     conn.commit()
-    #     g_logger.info(f"Table '{k_table_name}' deleted.")
-    # exists = inspector.has_table(table_name)
-    # g_logger.info(f"Table '{table_name}' exists: {exists}")
     return exists
 
 # -----------------------------------------------------------------------------
@@ -240,7 +232,6 @@ def create_table(engine) -> None:
     g_logger.debug(f"{inspect.stack()[0][3]}() - Creating table '{k_table_name}'")
     try:
         with engine.connect() as conn:
-
             conn.execute(text(k_SQL_Create_Table))
             g_logger.info(f"Table '{k_table_name}' re-created successfully.")
             conn.commit()
@@ -283,6 +274,7 @@ def create_app() -> Flask:
     # FLASK_DEBUG est à definir sur Heroku ou avec heroku config:set FLASK_DEBUG=True
     # En local faut utiliser secrtes.ps1
     app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
+    g_logger.warning(f"Dans main, app.config[DEBUG] = {app.config["DEBUG"] }")
     
     set_up_logger(app, app.config["DEBUG"])
     
