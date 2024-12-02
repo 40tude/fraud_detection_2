@@ -20,6 +20,7 @@ fraud_test.csv
 
 # "**/.mypy_cache/" ignore all directories named ".mypy_cache/""
 **/.mypy_cache/
+**/.pytest_cache/
 **/__pycache__/
 **/mlruns/ 
 **/logs/

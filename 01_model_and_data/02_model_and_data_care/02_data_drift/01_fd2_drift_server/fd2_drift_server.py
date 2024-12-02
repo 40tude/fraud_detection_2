@@ -6,7 +6,7 @@
 
 # DEBUG -----------------------------------------------------------------------
 # Procfile:
-# web: python -m flask --app fd2-drift-server run --host=0.0.0.0 --port=$PORT
+# web: python -m flask --app fd2_drift_server run --host=0.0.0.0 --port=$PORT
 # Note: This uses Flask's built-in server through the main module
 #
 # Enable debugging on Heroku:
@@ -16,7 +16,7 @@
 
 # PRODUCTION ------------------------------------------------------------------
 # Procfile:
-# web: gunicorn --workers=3 'fd2-drift-server:create_app()'
+# web: gunicorn --workers=3 'fd2_drift_server:create_app()'
 # Note: This setup uses nginx, bypasses the main module, and directly calls create_app()
 # See create_app() et app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "False") == "True"
 #
@@ -56,15 +56,16 @@
 
 
 # ----------------------------------------------------------------------
-from flask import Flask, jsonify
-from sqlalchemy.exc import SQLAlchemyError
-from config import Config
-from db import init_db, shutdown_session
-from logger import set_up_logger
-from routes import register_routes
+import os
 from pathlib import Path
 from dotenv import load_dotenv
-import os
+from flask import Flask, jsonify
+from sqlalchemy.exc import SQLAlchemyError
+
+from src.config import Config
+from src.logger import set_up_logger
+from src.routes import register_routes
+from src.db import init_db, shutdown_session
 
 # ----------------------------------------------------------------------
 # For mypy
