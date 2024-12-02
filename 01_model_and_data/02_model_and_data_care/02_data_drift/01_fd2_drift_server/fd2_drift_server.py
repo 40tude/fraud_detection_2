@@ -69,6 +69,8 @@ from src.db import init_db, shutdown_session
 
 # ----------------------------------------------------------------------
 # For mypy
+from flask import Response
+
 # from flask.typing import ResponseReturnValue
 # from typing import Callable
 
