@@ -1,12 +1,12 @@
 # routes.py
 
-from flask import Flask, jsonify, render_template, request, abort, jsonify, Response
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import text
-from db import get_session
 import logging
+from sqlalchemy import text
 from datetime import datetime
+from sqlalchemy.exc import SQLAlchemyError
+from flask import Flask, jsonify, render_template, request, abort, jsonify, Response
 
+from .db import get_session
 
 # -----------------------------------------------------------------------------
 # For Mypy

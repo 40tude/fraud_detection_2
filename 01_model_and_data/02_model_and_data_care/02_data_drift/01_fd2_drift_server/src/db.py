@@ -1,11 +1,12 @@
 import os
+import re
+import logging
 from datetime import datetime
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import scoped_session, sessionmaker, Session
 from sqlalchemy.exc import SQLAlchemyError
-from config import Config
-import logging
-import re
+from sqlalchemy.orm import scoped_session, sessionmaker, Session
+
+from .config import Config
 
 # -----------------------------------------------------------------------------
 # For Mypy

@@ -1,7 +1,7 @@
 # logger.py
 
-import logging
 import sys
+import logging
 from flask import Flask
 
 # -----------------------------------------------------------------------------
