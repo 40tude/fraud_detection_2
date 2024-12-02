@@ -51,7 +51,7 @@
 #   et appeler update_database()
 
 # Ajout de la feuille rapport d'un jour particulier
-#   Ajouterla route @app.route("/reports") dans route.py
+#   Ajouter la route @app.route("/reports") dans routes.py
 #   Modfifier templates/reports.html
 
 
@@ -73,7 +73,6 @@ from flask import Response
 
 # from flask.typing import ResponseReturnValue
 # from typing import Callable
-
 # RouteFunction = Callable[..., str]
 
 
@@ -111,7 +110,11 @@ def create_app() -> Flask:
     # Register routes
     register_routes(app)
 
-    # Remove the database session after each request
+    # Used to free the resources linked to the SQLAlchemy session at the end of each request in the Flask application.
+    # Flask provides a mechanism called application context, which manages resources specific to each HTTP request.
+    # When a request arrives, Flask creates an application context and a request context. These contexts last for the duration of the request.
+    # At the end of the request (whether it succeeds or an error occurs), Flask executes the functions registered with teardown_appcontext to clean up the resources.
+    # shutdown_session() is defined in db.py
     app.teardown_appcontext(shutdown_session)
 
     # Register global error handlers
@@ -121,6 +124,8 @@ def create_app() -> Flask:
 
 
 # ----------------------------------------------------------------------
+# Implements global error handlers for the Flask application.
+# These handlers automatically catch certain exceptions raised throughout the application and provide a standardized response to the client.
 def register_error_handlers(app: Flask) -> None:
     """
     Registers global error handlers for the Flask application.
@@ -129,11 +134,13 @@ def register_error_handlers(app: Flask) -> None:
     - app (Flask): The Flask application instance.
     """
 
+    # See SQLAlchemyError in db.py
     @app.errorhandler(SQLAlchemyError)
     def handle_sqlalchemy_error(error: SQLAlchemyError) -> tuple[Response, int]:
         app.logger.error(f"Database error: {error}")
         return jsonify({"error": "A database error occurred"}), 500
 
+    # See update_database() in db.py
     @app.errorhandler(FileNotFoundError)
     def handle_file_not_found_error(error: FileNotFoundError) -> tuple[Response, int]:
         app.logger.error(f"File not found: {error}")

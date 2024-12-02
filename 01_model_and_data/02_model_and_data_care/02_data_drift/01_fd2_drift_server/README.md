@@ -501,6 +501,34 @@ Dans les logs on voit que le rapport est généré et envoyé au serveur sur Her
 
 
 
+
+
+
+<!-- ###################################################################### -->
+<!-- ###################################################################### -->
+# Post-scriptum
+Après la soutenance du 28 novembre 2024  
+Je suis revenu sur le code pour :  
+1. M'assurer que tout fonctionne bien au niveau de la persistence des données sur le serveur Heroku (j'avais une petite Led qui clignotait dans le cerveau...). Passage sous PostgreSQL.
+1. M'assurer que les modes DEBUG et PRODUCTION sont gérés correctement
+1. Refactoriser le code afin de :
+    * Splitter le code en plusieurs fichiers plus courts et "cachés" dans un répertoire `src`. La dernière version monolithique du code est ``./assets/fd2-drift-server_07.py`` (attention aux '-' qui sont dorénavant des '_')
+    * Faire un vrai travail de typage des données afin de "plaire" à Mypy
+    * Utiliser des ``ScopedSession`` (supportent le multithread mais surtout elles évitent la réinitialisation de la connexion à chaque appel de ``engine.connect()``)
+    * Revoir ces histoires de ``engine.begin()`` vs ``engine.connect()``. À ce propos il ne faut pas hésiter à relire les commentaires dans ``./assets/fd2-drift-server_07.py``
+        * With ``engine.begin()``, changes are automatically committed or rolled back
+        * With ``engine.connect()``, an explicit commit is required to save changes to the database. ``engine.connect()`` should be used for read-only operations without modifications, or when transactions are not required.
+    * Utiliser un fichier ``.env`` plutôt qu'un fichier ``secrets.ps1``
+    * Améliorer/centraliser la gestion des exceptions
+    * ...
+
+J'ai pas vraiment de documentation  
+Voir les commentaires en haut de ``fd2_drift_server.py`` et dans ``./assets/fd2-drift-server_07.py``
+
+
+
+
+
 <!-- ###################################################################### -->
 <!-- ###################################################################### -->
 # What's next ?
